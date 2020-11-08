@@ -30,3 +30,12 @@ spring:
 #    default-encoding: UTF-8
 #  jackson:
 #    default-property-inclusion: NON_NULL
+
+environment-params:
+  verify-code-valid-seconds: 300 # 5 minutes
+  verify-code-retry-max: 5 # 5 times/day
+  web-client-secret: fDw7Mpkk5czHNuSRtmhGmAGL42CaxQB9
+  web-access-validity-seconds: 900 # 15 minutes
+  web-refresh-validity-seconds: 432000 # 5 days
+  mobile-access-validity-seconds: 900 # 15 minutes
+  mobile-refresh-validity-seconds: 259200 # 3 days
