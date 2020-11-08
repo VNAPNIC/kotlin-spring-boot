@@ -1,0 +1,32 @@
+server:
+  port: 8443
+spring:
+  thymeleaf:
+    cache: false
+  datasource:
+    name: newbee-mall-datasource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/vnapnic_schema?useSSL=false&useUnicode=true&characterEncoding=UTF8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    schema: classpath:database/schema.sql
+    data: classpath:database/data.sql
+    sql-script-encoding: UTF-8
+    initialization-mode: always
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-secret: fDw7Mpkk5czHNuSRtmhGmAGL42CaxQB9
+          client-id: R2dpxQ3vPrtfgF72
+#  redis:
+#    host: localhost
+#    port: 6379
+#    password: Your password
+#  mail:
+#    host: Your SMTP server like smtp.126.com
+#    username: Your Email Address
+#    password: Your password
+#    default-encoding: UTF-8
+#  jackson:
+#    default-property-inclusion: NON_NULL
