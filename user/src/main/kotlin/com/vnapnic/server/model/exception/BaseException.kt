@@ -7,7 +7,7 @@ import java.time.ZonedDateTime
 class BaseException(val error: String, val meaning: String, val status: Int,
                     val timestamp: ZonedDateTime = ZonedDateTime.now()
 ) : RuntimeException("{" +
-        "\"errorCode\": $\"$error\"," +
+        "\"error\": $\"$error\"," +
         "\"status\": $\"$status\"," +
         "\"message\": $\"$meaning\"," +
         "\"timestamp\": $\"$timestamp\"" +
