@@ -34,8 +34,20 @@ spring:
 environment-params:
   verify-code-valid-seconds: 300 # 5 minutes
   verify-code-retry-max: 5 # 5 times/day
-  web-client-secret: fDw7Mpkk5czHNuSRtmhGmAGL42CaxQB9
+  web-client-id: vnapnicWeb
+  web-client-secret: wtxTin9YdfVKhSHaD3OKOR/ygxu4Qu00TmqXVcSIaWQ
+  web-client-scopes: User-WEB
   web-access-validity-seconds: 900 # 15 minutes
   web-refresh-validity-seconds: 432000 # 5 days
+  mobile-client-id: vnapnicMobile
+  mobile-client-secret: 46QYmEYLSwQAO7dg0vPPxZoSk6B9HcmjkqVm2gic3Yc
+  mobile-client-scopes: User-MOBILE
   mobile-access-validity-seconds: 900 # 15 minutes
   mobile-refresh-validity-seconds: 259200 # 3 days
+  visitor-client-id: MyFavoritesVisitor
+  visitor-client-secret: rUEQUcfE3DsEImXWM7XL6u5dWYXyy6YPss7bN8MgstE
+  visitor-client-scopes: Visitor-Restricted
+  visitor-access-validity-seconds: 600 # 10 minutes
+  visitor-refresh-validity-seconds: 0 # not allowed
+  server-internal-id: vnapnicServer
+  server-internal-secret: /mMulEUHjP7/IAa+xhHADVRM4sJwIFWteleFh6+M/wg
