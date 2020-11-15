@@ -1,0 +1,45 @@
+server:
+  port: 1431
+spring:
+  application:
+    name: user-service
+  thymeleaf:
+    cache: false
+  datasource:
+    name: newbee-mall-datasource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/vnapnic_schema?useSSL=false&useUnicode=true&characterEncoding=UTF8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    schema: classpath:database/schema.sql
+    data: classpath:database/data.sql
+    sql-script-encoding: UTF-8
+    initialization-mode: always
+  redis:
+    host: localhost
+    port: 8001
+  jackson:
+    default-property-inclusion: NON_NULL
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1421/eureka/
+  instance:
+    hostname: localhost
+
+#  redis:
+#    host: localhost
+#    port: 6379
+#    password: Your password
+#  mail:
+#    host: Your SMTP server like smtp.126.com
+#    username: Your Email Address
+#    password: Your password
+#    default-encoding: UTF-8
+#  jackson:
+#    default-property-inclusion: NON_NULL
+jwt-config:
+  prefix: Bearer
+  header: Authorization
+  secret: mySecret
+  expiration: 900000
