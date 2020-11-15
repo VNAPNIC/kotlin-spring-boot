@@ -1,2 +1,11 @@
 server:
   port: 1423
+spring:
+  application:
+    name: admin-service
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://localhost:1421/eureka/

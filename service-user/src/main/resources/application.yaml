@@ -21,11 +21,11 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
 eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:1421/eureka/
   instance:
     hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://localhost:1421/eureka/
 
 #  redis:
 #    host: localhost
