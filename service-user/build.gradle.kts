@@ -2,6 +2,7 @@ dependencies {
 
     implementation(project(":service-common"))
 
+    implementation("io.jsonwebtoken:jjwt:0.9.1")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     //security

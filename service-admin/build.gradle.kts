@@ -1,17 +1,12 @@
-extra["springBootAdminVersion"] = "2.3.0"
-
 dependencies {
-    implementation(project(":service-common"))
 
-    implementation("de.codecentric:spring-boot-admin-starter-server")
-    implementation("de.codecentric:spring-boot-admin-server-ui")
+    implementation("de.codecentric:spring-boot-admin-starter-server:2.3.0")
+    implementation("de.codecentric:spring-boot-admin-starter-client:2.3.0")
+    implementation("de.codecentric:spring-boot-admin-server-ui:2.3.0")
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("de.codecentric:spring-boot-admin-dependencies:${property("springBootAdminVersion")}")
-    }
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 }

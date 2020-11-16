@@ -1,11 +1,27 @@
 server:
-  port: 1423
+  port: 1422
 spring:
   application:
     name: admin-service
+  security:
+    user:
+      name: hainam1421
+      password: hainam
 eureka:
   instance:
     hostname: localhost
+    health-check-url-path: /actuator/health
+    appname: admin-service
   client:
     service-url:
       defaultZone: http://localhost:1421/eureka/
+    fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

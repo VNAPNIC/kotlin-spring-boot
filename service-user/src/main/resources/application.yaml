@@ -27,19 +27,4 @@ eureka:
     service-url:
       defaultZone: http://localhost:1421/eureka/
 
-#  redis:
-#    host: localhost
-#    port: 6379
-#    password: Your password
-#  mail:
-#    host: Your SMTP server like smtp.126.com
-#    username: Your Email Address
-#    password: Your password
-#    default-encoding: UTF-8
-#  jackson:
-#    default-property-inclusion: NON_NULL
-jwt-config:
-  prefix: Bearer
-  header: Authorization
-  secret: mySecret
-  expiration: 900000
+#JWT properties
