@@ -1,8 +1,8 @@
 package com.vnapnic.user.controller.v1.user.impl
 
 import com.vnapnic.user.controller.v1.user.UserController
-import com.vnapnic.user.model.exception.BaseException
-import com.vnapnic.user.model.exception.ExceptionEnum
+import com.vnapnic.user.exception.BaseException
+import com.vnapnic.user.exception.ExceptionEnum
 import com.vnapnic.user.model.user.request.UserRegisterReq
 import com.vnapnic.user.model.user.response.UserRes
 import com.vnapnic.user.service.user.UserService

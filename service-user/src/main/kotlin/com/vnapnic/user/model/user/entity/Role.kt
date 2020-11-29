@@ -1,13 +1,26 @@
 package com.vnapnic.user.model.user.entity
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.Table
+import com.fasterxml.jackson.annotation.JsonIgnore
+import org.hibernate.annotations.NaturalId
+import javax.persistence.*
 
-@Entity
-@Table(name = "roles")
+enum class RoleName {
+    ROLE_ADMIN,
+    ROLE_USER
+}
+
+@Entity(name = "role")
 data class Role(@GeneratedValue(strategy = GenerationType.IDENTITY)
-                @Id var id: Int? = null,
-                var role: String = "") : java.io.Serializable
+                @Id
+                @Column(name = "role_id")
+                var id: Long? = null,
+
+                @Column(name = "role_name", unique = true, length = 100)
+                @Enumerated(EnumType.STRING)
+                @NaturalId
+                var role: RoleName? = null,
+
+                @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+                @JsonIgnore
+                var userList: MutableList<User> = mutableListOf()
+) : java.io.Serializable

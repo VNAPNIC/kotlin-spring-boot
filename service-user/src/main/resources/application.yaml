@@ -28,3 +28,8 @@ eureka:
       defaultZone: http://localhost:1421/eureka/
 
 #JWT properties
+jwt-config:
+  prefix: Bearer
+  header: Authorization
+  secret: mySecret
+  expiration: 900000

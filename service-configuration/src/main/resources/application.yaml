@@ -1,0 +1,6 @@
+#JWT properties
+jwt-security:
+  prefix: Bearer
+  header: Authorization
+  secret: mySecret
+  expiration: 900000
