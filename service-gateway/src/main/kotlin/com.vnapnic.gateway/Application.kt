@@ -1,4 +1,4 @@
-package com.vnapnic.user
+package com.vnapnic.gateway
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
