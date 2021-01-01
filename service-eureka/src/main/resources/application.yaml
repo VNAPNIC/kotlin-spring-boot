@@ -1,16 +1,13 @@
+server:
+  port: 1421
+
 spring:
   application:
     name: eureka-service
-server:
-  port: 1421
 
 eureka:
   instance:
     hostname: localhost
-  server:
-    enable-self-preservation: false
   client:
     register-with-eureka: false
     fetch-registry: false
-    service-url:
-      defaultZone: http://localhost:${server.port}/eureka/
