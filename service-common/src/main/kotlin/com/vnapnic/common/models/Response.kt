@@ -1,5 +1,7 @@
 package com.vnapnic.common.models
 
+import kotlinx.coroutines.*
+
 class Response<T> {
     private var code: Long = 0
     private var message: String? = null
@@ -28,6 +30,9 @@ class Response<T> {
     }
 
     fun <T> failed(message: String?): Response<T>? {
+        corout  =ươineScope{
+
+        }
         return Response(ResultCode.FAILED.code, message, null)
     }
 
