@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.ResponseBody
 @RequestMapping("/api/user")
 class SignUpController(val service: SignUpService) {
 
-    @PostMapping("/signup")
-    @ResponseBody
-    fun signUp(
-            @RequestParam username: String,
-            @RequestParam password: String,
-            @RequestParam firstName: String,
-            @RequestParam lastName: String,
-            @RequestParam email: String
-    ) : Response<User> {
-
-        return Response<User>.failed<User>()
-    }
+//    @PostMapping("/signup")
+//    @ResponseBody
+//    fun signUp(
+//            @RequestParam username: String,
+//            @RequestParam password: String,
+//            @RequestParam firstName: String,
+//            @RequestParam lastName: String,
+//            @RequestParam email: String
+//    ) : Response<User>? {
+//
+//        return Response<User>.failed<User>()
+//    }
 }
