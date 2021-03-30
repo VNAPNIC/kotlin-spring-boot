@@ -6,8 +6,8 @@ import org.springframework.boot.runApplication
 
 @SpringBootApplication
 @EnableEurekaServer
-class Application
+class EurekaApplication
 
 fun main(args: Array<String>) {
-    runApplication<Application>(*args)
+    runApplication<EurekaApplication>(*args)
 }

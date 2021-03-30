@@ -8,8 +8,8 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy
 @SpringBootApplication
 @EnableEurekaClient
 @EnableZuulProxy
-class Application
+class GatewayApplication
 
 fun main(args: Array<String>) {
-    runApplication<Application>(*args)
+    runApplication<GatewayApplication>(*args)
 }

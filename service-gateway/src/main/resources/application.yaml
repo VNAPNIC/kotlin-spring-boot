@@ -1,10 +1,12 @@
+server:
+  port: 8762
 spring:
   application:
-    name: gateway-service
+    name: gateway
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:10000/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 # A prefix that can added to beginning of all requests.
 #zuul.prefix=/api
@@ -12,8 +14,9 @@ eureka:
 # They should be only accessed through the path defined below.
 # Map paths to services
 zuul:
-  ignored-services=*:
+  ignoredServices: '*'
   routes:
     user-service:
       path: /api/user/**
       serviceId: user-service
+      strip-prefix: false
