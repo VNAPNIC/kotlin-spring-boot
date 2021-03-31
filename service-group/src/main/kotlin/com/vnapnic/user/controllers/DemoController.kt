@@ -10,6 +10,6 @@ class DemoController(@Autowired private val demoService: DemoService) {
 
     @GetMapping("/hello")
     fun test(): String {
-        return "Hello user"
+        return "Hello group"
     }
 }
