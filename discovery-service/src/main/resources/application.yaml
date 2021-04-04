@@ -1,0 +1,15 @@
+server:
+  port: 8761
+spring:
+  application:
+    name: auth-service
+  # Database
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/vn-socail
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: false
+    fetchRegistry: false

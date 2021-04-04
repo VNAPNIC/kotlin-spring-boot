@@ -1,6 +1,7 @@
 rootProject.name = "kotlin-spring-boot"
-include("service-common")
-include("service-gateway")
-include("service-eureka")
-include("service-user")
-include("service-group")
+include("common")
+include("gateway-service")
+include("discovery-service")
+include("user-service")
+include("peoples-service")
+include("auth-service")

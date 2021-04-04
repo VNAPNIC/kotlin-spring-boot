@@ -85,7 +85,7 @@ subprojects {
 
     configure<DependencyManagementExtension> {
         imports {
-            val springBootVersion = parent!!.extra.get("springBootVersion")
+            val springBootVersion = parent?.extra?.get("springBootVersion")
             val springCloudVersion = "Hoxton.SR9"
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
             mavenBom("org.springframework.boot:spring-boot-parent:$springBootVersion")
