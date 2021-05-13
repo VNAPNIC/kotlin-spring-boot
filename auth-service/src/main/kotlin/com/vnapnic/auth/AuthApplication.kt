@@ -12,13 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder
 @SpringBootApplication
 @EnableDiscoveryClient
 @ConfigurationPropertiesScan
-class AuthApplication
+class AuthApplication{
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder()
+    }
+}
 
 fun main(args: Array<String>) {
     runApplication<AuthApplication>(*args)
 }
 
-@Bean
-fun passwordEncoder(): PasswordEncoder {
-    return BCryptPasswordEncoder()
-}

@@ -1,0 +1,71 @@
+dnf install openssl
+
+sudo nano /etc/yum.repos.d/mongodb-org-4.2.repo
+
+[mongodb-org-4.4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+
+
+Save the file (Ctrl+o) and exit (Ctrl+x).
+
+
+sudo yum install -y mongodb-org
+
+sudo yum install checkpolicy
+
+
+sudo systemctl start mongod
+sudo systemctl daemon-reload
+sudo systemctl restart mongod
+sudo systemctl enable mongod
+sudo systemctl status mongod
+
+
+=============================
+mongo
+use admin
+
+db.createUser(
+ {
+ user: "vnapnic",
+ pwd: "123456",
+ roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+ }
+ )
+
+show users
+quit()
+
+===============================
+
+sudo nano /lib/systemd/system/mongod.service
+
+Find the following line:
+Environment="OPTIONS=--f /etc/mongod.conf"
+
+Add the --auth option as follows:
+Environment="OPTIONS= --auth -f /etc/mongod.conf"
+
+Save the file (Ctrl+o) and exit (Ctrl+x).
+===================================
+
+sudo systemctl daemon-reload
+sudo systemctl restart mongod
+
+=================================
+
+mongo
+use admin
+show users
+
+db.auth("vnapnic", "123456")
+
+show users
+
+
+================================
+sudo netstat -plunt | grep mongo

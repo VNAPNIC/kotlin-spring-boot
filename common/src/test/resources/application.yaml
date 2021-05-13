@@ -1,0 +1,4 @@
+application:
+  jwtTTL: 7776000000 #90 days (ms)
+  jwtPhase: 9b6dae5aeedc5432dd25f160e829b64e
+  jwtIssuer: vn-social

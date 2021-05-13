@@ -3,13 +3,17 @@ server:
 spring:
   application:
     name: gateway
+  redis:
+    database: 2
+    host: 127.0.0.1
+    port: 6379
+    timeout: 60000
 eureka:
   client:
     healthcheck:
       enabled: true
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
-
 zuul:
   host:
     connect-timeout-millis: 15000

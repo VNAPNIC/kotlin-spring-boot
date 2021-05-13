@@ -1,0 +1,18 @@
+mongo
+use admin
+
+db.createUser(
+ {
+ user: "vnapnic",
+ pwd: "123456",
+ roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+ }
+ )
+
+show users
+quit()
+
+
+use vnapnic
+db
+show dbs

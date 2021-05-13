@@ -4,9 +4,16 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 server:
   port: 8763
+  tomcat:
+    protocol-header: x-forwarded-proto
+  forward-headers-strategy: native
 spring:
   application:
     name: auth-service
+  # Database
+#  data:
+#    mongodb:
+#      uri: mongodb://127.0.0.1:27017/vnapnic
 application:
   jwtTTL: 7776000000 #90 days (ms)
   jwtPhase: 9b6dae5aeedc5432dd25f160e829b64e
