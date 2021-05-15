@@ -1,0 +1,17 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+server:
+  port: 8766
+spring:
+  application:
+    name: media-service
+  servlet:
+    multipart:
+      max-file-size: 500KB
+      max-request-size: 500KB
+  # Database
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/Cleaner

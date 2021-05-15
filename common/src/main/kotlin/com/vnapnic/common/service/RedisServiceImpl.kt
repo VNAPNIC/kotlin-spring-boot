@@ -1,18 +1,13 @@
 package com.vnapnic.common.service
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 
 /**
  * Redis operation implementation class
  * Created by nankai on 2020/3/3.
  */
-class RedisServiceImpl : RedisService {
-
-    @Autowired
-    lateinit var redisTemplate: RedisTemplate<String, Any>
+class RedisServiceImpl(private val redisTemplate: RedisTemplate<String, Any>) : RedisService {
 
     override fun set(key: String, value: Any, time: Long) {
         redisTemplate.opsForValue()[key, value, time] = TimeUnit.SECONDS
@@ -20,6 +15,10 @@ class RedisServiceImpl : RedisService {
 
     override fun set(key: String, value: Any) {
         redisTemplate.opsForValue()[key] = value
+    }
+
+    override fun gets(key: String): Set<Any>? {
+        return redisTemplate.keys(key)
     }
 
     override fun get(key: String): Any? {
@@ -157,5 +156,4 @@ class RedisServiceImpl : RedisService {
     override fun lRemove(key: String, count: Long, value: Any): Long? {
         return redisTemplate.opsForList().remove(key, count, value)
     }
-
 }

@@ -4,28 +4,31 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.zuul.ZuulFilter
 import com.netflix.zuul.context.RequestContext
 import com.vnapnic.common.models.Response
-import com.vnapnic.common.service.RedisService
-import com.vnapnic.gateway.property.ApplicationProperty
+import com.vnapnic.common.service.JWTService
 import org.apache.http.HttpStatus
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestTemplate
 
 @Component
 class JwtFilter : ZuulFilter() {
     private val log = LoggerFactory.getLogger(JwtFilter::class.java)
 
     @Autowired
-    lateinit var redisService: RedisService
+    lateinit var restTemplate: RestTemplate
 
     @Autowired
-    lateinit var property: ApplicationProperty
+    lateinit var jwtService: JWTService
 
     override fun shouldFilter(): Boolean {
         val context = RequestContext.getCurrentContext()
         val request = context.request
         val requestUrl = request.requestURL.toString()
-        return requestUrl.contains("/auth/")
+        return requestUrl.indexOf("/auth/") <= 0
     }
 
     override fun filterType(): String = "pre"
@@ -38,7 +41,7 @@ class JwtFilter : ZuulFilter() {
         log.info(String.format("%s request to %s", request.method, request.requestURL.toString()))
 
         val accessToken = request.getHeader("Authorization")
-        if (accessToken == null || accessToken.startsWith("Bearer ")) {
+        if (accessToken == null || !accessToken.startsWith("Bearer")) {
             log.warn("Missing Authorization header and token.")
             context.setSendZuulResponse(false)
             context.responseStatusCode = HttpStatus.SC_UNAUTHORIZED
@@ -47,10 +50,22 @@ class JwtFilter : ZuulFilter() {
                 val mapper = ObjectMapper()
                 context.responseBody = mapper.writeValueAsString(Response.unauthorized<Any>())
             } catch (e: Exception) {
+                e.printStackTrace()
+                log.error("Cannot validate token: $accessToken from ${request.requestURL.toString()}")
             }
-            return null
+        } else {
+            try {
+                log.info("Token - $accessToken")
+                val token: String = accessToken.substring(7, accessToken.length)
+                jwtService.parseJWT(token)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                context.setSendZuulResponse(false)
+                context.responseStatusCode = HttpStatus.SC_UNAUTHORIZED
+                val mapper = ObjectMapper()
+                context.responseBody = mapper.writeValueAsString(Response.unauthorized<Any>())
+            }
         }
-        log.debug(property.authServiceUrl)
         return null
     }
 }

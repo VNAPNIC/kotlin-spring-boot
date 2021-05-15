@@ -26,10 +26,7 @@ zuul:
     auth-service:
       serviceId: auth-service
       path: /auth/**
-    user-service:
-      serviceId: user-service
-      path: /user/**
-      strip-prefix: false
-    peoples-service:
-      serviceId: peoples-service
-      path: /people/**
+    media-service:
+      serviceId: media-service
+      path: /media/**
+  sensitive-headers: Cookie,Set-Cookie

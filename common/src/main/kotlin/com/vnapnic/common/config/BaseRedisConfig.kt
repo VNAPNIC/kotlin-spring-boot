@@ -37,5 +37,5 @@ open class BaseRedisConfig : CachingConfigurerSupport() {
     }
 
     @Bean
-    open fun redisService() : RedisService = RedisServiceImpl()
+    open fun redisService(redisTemplate: RedisTemplate<String, Any>) : RedisService = RedisServiceImpl(redisTemplate)
 }

@@ -2,5 +2,5 @@ package com.vnapnic.auth.config
 
 import org.springframework.context.annotation.Configuration
 
-//@Configuration
+@Configuration
 class MongoConfig {}

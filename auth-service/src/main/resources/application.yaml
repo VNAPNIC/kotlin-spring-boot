@@ -11,14 +11,19 @@ spring:
   application:
     name: auth-service
   # Database
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/Cleaner
+  # Redis
+  redis:
+    database: 2
+    host: 127.0.0.1
+    port: 6379
+    timeout: 60000
+  # Database
 #  data:
 #    mongodb:
 #      uri: mongodb://127.0.0.1:27017/vnapnic
-application:
-  jwtTTL: 7776000000 #90 days (ms)
-  jwtPhase: 9b6dae5aeedc5432dd25f160e829b64e
-  jwtIssuer: vn-social
-
 #server:
 #  port: 1431
 #spring:

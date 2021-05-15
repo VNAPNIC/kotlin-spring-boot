@@ -1,6 +1,6 @@
 package com.vnapnic.common.models
 
-class Response<T>(val code: Long, val message: String?, val token: String? = null, val data: T? = null) {
+class Response<T>(val code: Long, val message: String?, val errorCode: Long? = null, val error: String? = null, val token: String? = null, val data: T? = null) {
 
     companion object {
         /**
@@ -10,20 +10,21 @@ class Response<T>(val code: Long, val message: String?, val token: String? = nul
          * @param message prompt message
          */
         fun <T> success(data: T? = null, message: String = ResultCode.SUCCESS.message): Response<T> {
-            return Response(ResultCode.SUCCESS.code, message, data = data)
+            return Response(code = ResultCode.SUCCESS.code, message = message, data = data)
         }
 
         fun <T> success(data: T? = null, token: String? = null, message: String = ResultCode.SUCCESS.message): Response<T> {
-            return Response(ResultCode.SUCCESS.code, message, token, data)
+            return Response(code = ResultCode.SUCCESS.code, message = message, token = token, data = data)
         }
 
         /**
          * Failed to return result
-         * @param errorCode error code
-         * @param message error message
+         * @param status error [ResultCode]
+         * @param error error [ErrorCode]
          */
-        fun <T> failed(errorCode: IErrorCode? = null, message: String? = null): Response<T> {
-            return Response(errorCode?.getCode() ?: ResultCode.FAILED.code, message, null)
+        fun <T> failed(status: ResultCode? = null, error: ErrorCode): Response<T> {
+            return Response(code = status?.code
+                    ?: ResultCode.FAILED.code, message = status?.message, errorCode = error.code, error = error.message, data = null)
         }
 
         /**
@@ -31,21 +32,21 @@ class Response<T>(val code: Long, val message: String?, val token: String? = nul
          * @param message prompt message
          */
         fun <T> validateFailed(message: String?): Response<T> {
-            return Response(ResultCode.VALIDATE_FAILED.code, message, null);
+            return Response(code = ResultCode.VALIDATE_FAILED.code, message = message, data = null);
         }
 
         /**
          * Not login to return results
          */
         fun <T> unauthorized(data: T? = null): Response<T> {
-            return Response(ResultCode.UNAUTHORIZED.code, ResultCode.UNAUTHORIZED.message, data = null)
+            return Response(code = ResultCode.UNAUTHORIZED.code, message = ResultCode.UNAUTHORIZED.message, data = null)
         }
 
         /**
          * Not authorized to return results
          */
         fun <T> forbidden(data: T? = null): Response<T>? {
-            return Response(ResultCode.FORBIDDEN.code, ResultCode.FORBIDDEN.message, data = data)
+            return Response(code = ResultCode.FORBIDDEN.code, message = ResultCode.FORBIDDEN.message, data = data)
         }
     }
 }

@@ -19,6 +19,11 @@ interface RedisService {
     /**
      * Get attributes
      */
+    fun gets(key: String): Set<Any>?
+
+    /**
+     * Get attributes
+     */
     operator fun get(key: String): Any?
 
     /**

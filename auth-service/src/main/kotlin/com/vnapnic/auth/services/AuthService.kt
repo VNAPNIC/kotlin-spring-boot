@@ -1,74 +1,45 @@
 package com.vnapnic.auth.services
 
-import com.vnapnic.common.models.Account
-import com.vnapnic.common.property.ApplicationProperty
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import com.vnapnic.auth.model.Account
+import com.vnapnic.auth.repositories.AccountRepository
+import com.vnapnic.common.service.JWTServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.security.Key
-import java.util.*
-import java.util.UUID
-import javax.crypto.spec.SecretKeySpec
-import javax.xml.bind.DatatypeConverter
 
 
 interface AuthService {
     fun bySocialId(socialId: String?): Account?
     fun byEmail(email: String?): Account?
 
-    //    fun save(account: Account?): Account?
-    fun validatePassword(password: String?, account: Account?): Boolean
+    fun existsBySocialId(socialId: String?): Boolean
+    fun existsByEmail(email: String): Boolean
+    fun existsByPhoneNumber(phoneNumber: String): Boolean
+
+    fun save(account: Account?): Account?
+    fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
-//    fun parseJWT(token: String?): Account?
 }
 
-
 @Service
-class AuthServiceImpl : AuthService {
+class AuthServiceImpl : JWTServiceImpl(), AuthService {
 
-//    @Autowired
-//    lateinit var accountRepository: AccountRepository
+    @Autowired
+    lateinit var accountRepository: AccountRepository
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
+    override fun bySocialId(socialId: String?): Account? = accountRepository.findBySocialId(socialId)
 
+    override fun byEmail(email: String?): Account? = accountRepository.findByEmail(email)
 
-    override fun bySocialId(socialId: String?): Account? = Account("123", email = "test@gmail.com", password = passwordEncoder.encode("123456"))
+    override fun existsBySocialId(socialId: String?): Boolean = accountRepository.existsBySocialId(socialId)
+    override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
+    override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
 
-//    override fun byEmail(email: String?): Account? = accountRepository.findByEmail(email)
+    override fun save(account: Account?): Account? = if (account != null) accountRepository.save(account) else null
 
-    override fun byEmail(email: String?): Account? = Account("123", email = "test@gmail.com", password = passwordEncoder.encode("123456"))
-
-//    override fun save(account: Account?): Account? = if(account!=null) accountRepository.save(account) else null
-
-    override fun validatePassword(password: String?, account: Account?): Boolean = passwordEncoder.matches(password, account?.password)
-
+    override fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean = passwordEncoder.matches(rawPassword, encodedPassword)
     override fun encryptPassword(password: String?): String? = passwordEncoder.encode(password)
-
-
-//    override fun parseJWT(token: String?): Account? {
-//        //This line will throw an exception if it is not a signed JWS (as expected)
-//        val jwsClaims = Jwts.parser()
-//                .setSigningKey(DatatypeConverter.parseBase64Binary(property.jwtPhase))
-//                .parseClaimsJws(token)
-//
-//        if (jwsClaims.header.getAlgorithm() != SignatureAlgorithm.HS256.value) throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
-//        val claims = jwsClaims.body
-//
-//        // Find record from redis
-//        val record: String = redis.opsForValue().get("tkn:" + claims.id)
-//        if (record == null || !token.equals(record)) {
-//            throw AuthenticationException("Token is expired.")
-//        }
-//
-//        val account = accountRepository.findOne()
-//                ?: throw AuthenticationException("Cannot find user account.")
-//        if (!account.active!!) throw AuthenticationException("Account is inactivated.")
-//
-//        return account
-//    }
-
 }

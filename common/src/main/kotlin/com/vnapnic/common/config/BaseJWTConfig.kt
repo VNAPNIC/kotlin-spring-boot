@@ -7,5 +7,5 @@ import org.springframework.context.annotation.Configuration
 
 open class BaseJWTConfig {
     @Bean
-    fun jwtService(): JWTService = JWTServiceImpl()
+    open fun jwtService(): JWTService = JWTServiceImpl()
 }
