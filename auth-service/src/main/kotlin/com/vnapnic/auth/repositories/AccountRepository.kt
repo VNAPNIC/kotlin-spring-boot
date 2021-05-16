@@ -1,6 +1,6 @@
 package com.vnapnic.auth.repositories
 
-import com.vnapnic.auth.model.Account
+import com.vnapnic.common.db.Account
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 

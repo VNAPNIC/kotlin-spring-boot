@@ -48,10 +48,10 @@ class JwtFilter : ZuulFilter() {
 
             try {
                 val mapper = ObjectMapper()
-                context.responseBody = mapper.writeValueAsString(Response.unauthorized<Any>())
+                context.responseBody = mapper.writeValueAsString(Response.unauthorized())
             } catch (e: Exception) {
                 e.printStackTrace()
-                log.error("Cannot validate token: $accessToken from ${request.requestURL.toString()}")
+                log.error("Cannot validate token: $accessToken from ${request.requestURL}")
             }
         } else {
             try {
@@ -63,7 +63,7 @@ class JwtFilter : ZuulFilter() {
                 context.setSendZuulResponse(false)
                 context.responseStatusCode = HttpStatus.SC_UNAUTHORIZED
                 val mapper = ObjectMapper()
-                context.responseBody = mapper.writeValueAsString(Response.unauthorized<Any>())
+                context.responseBody = mapper.writeValueAsString(Response.unauthorized())
             }
         }
         return null

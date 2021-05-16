@@ -27,12 +27,12 @@ class AuthController {
     lateinit var jwtService: JWTService
 
     @RequestMapping(value = ["/email"], method = [RequestMethod.POST])
-    fun authWithEmail(@RequestBody json: Map<String, String>): Response<AccountDTO> {
+    fun authWithEmail(@RequestBody json: Map<String, String>): Response {
 
         val email: String? = json["email"]
         val password: String? = json["password"]
-        var accountDTO: AccountDTO?
-        var jwt: String?
+        val accountDTO: AccountDTO?
+        val jwt: String?
 
         if (email == null || email == "") {
             return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)

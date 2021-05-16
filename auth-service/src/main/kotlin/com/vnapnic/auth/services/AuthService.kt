@@ -1,12 +1,10 @@
 package com.vnapnic.auth.services
 
-import com.vnapnic.auth.model.Account
 import com.vnapnic.auth.repositories.AccountRepository
-import com.vnapnic.common.service.JWTServiceImpl
+import com.vnapnic.common.db.Account
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-
 
 interface AuthService {
     fun bySocialId(socialId: String?): Account?
@@ -22,7 +20,7 @@ interface AuthService {
 }
 
 @Service
-class AuthServiceImpl : JWTServiceImpl(), AuthService {
+class AuthServiceImpl :  AuthService {
 
     @Autowired
     lateinit var accountRepository: AccountRepository

@@ -1,7 +1,7 @@
 package com.vnapnic.auth.services
 
 import com.vnapnic.auth.exception.SequenceException
-import com.vnapnic.auth.model.SequenceId
+import com.vnapnic.common.db.SequenceId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoOperations
@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
-
 
 interface SequenceGeneratorService {
     fun nextSequenceId(key: String): Int?

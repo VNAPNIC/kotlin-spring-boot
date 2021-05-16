@@ -57,16 +57,21 @@ open class JWTServiceImpl : JWTService {
 
         val jwt = builder.compact()
         // Remove previous token record
-        redisService.gets("account:tkn:${accountDTO?.id}")?.forEach { _ ->
+        val redis = redisService.gets("account:tkn:${accountDTO?.id}")?.forEach { _ ->
             val id = redisService["account:tkn:${accountDTO?.id}"]
             if (id?.equals(jwtId) == false) {
                 redisService.del("tkn:${id}")
             }
         }
 
-        redisService["tkn:${jwtId}"] = jwt
-        redisService["account:tkn:${accountDTO?.id}"] = jwtId
-        redisService.expire("tkn:${jwtId}", nowMillis + (property.jwtTTL ?: 0))
+        log.info("redisssssssssssssssssss: $redis")
+        log.info("jwtIddddddddddddddddddd: $jwtId")
+
+        accountDTO?.id?.let { id ->
+            redisService["tkn:$jwtId"] = jwt
+            redisService["account:tkn:$id"] = jwtId
+            redisService.expire("tkn:$jwtId", nowMillis + (property.jwtTTL ?: 0))
+        } ?: throw AuthenticationException("Token is expired.")
 
         return jwt
     }
@@ -81,13 +86,16 @@ open class JWTServiceImpl : JWTService {
             throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
         val claims = jwsClaims.body
 
+        log.info("jwtIddddddddddddddddddd: ${claims.id}")
+        log.info("accountIddddddddddddddd: ${jwsClaims.body.subject}")
+
         // Find record from redis
         val record: String? = redisService["tkn:" + claims.id] as? String
         if (record == null || !token.equals(record)) {
             throw AuthenticationException("Token is expired.")
         }
 
-        return record
+        return jwsClaims.body.subject ?: throw AuthenticationException("Token is expired.")
     }
 
 }

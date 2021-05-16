@@ -18,5 +18,7 @@ enum class ErrorCode(val code: Long, val message: String) {
 
     FILE_TOO_LARGE(1010,"File too large."),
 
-    FILE_UPLOAD_FAIL(1011,"Upload file fail.")
+    FILE_UPLOAD_FAIL(1011,"Upload file fail."),
+
+    UNSUPPORTED_MEDIA_TYPE(1012,"Unsupported Media Type.")
 }

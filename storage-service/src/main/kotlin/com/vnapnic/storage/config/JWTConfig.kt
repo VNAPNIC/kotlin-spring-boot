@@ -1,4 +1,4 @@
-package com.vnapnic.gateway.config
+package com.vnapnic.storage.config
 
 import com.vnapnic.common.config.BaseJWTConfig
 import org.springframework.cache.annotation.EnableCaching

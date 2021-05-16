@@ -1,8 +1,8 @@
 package com.vnapnic.auth.controllers
 
-import com.vnapnic.auth.model.Account
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.auth.services.SequenceGeneratorService
+import com.vnapnic.common.db.Account
 import com.vnapnic.common.dto.AccountDTO
 import com.vnapnic.common.models.ErrorCode
 import com.vnapnic.common.models.Response
@@ -28,7 +28,7 @@ class RegisterController {
     lateinit var sequenceService: SequenceGeneratorService
 
     @RequestMapping(value = ["/staff"], method = [RequestMethod.POST])
-    fun registerStaffWithEmail(@RequestBody json: Map<String, String>): Response<AccountDTO> {
+    fun registerStaffWithEmail(@RequestBody json: Map<String, String>): Response {
         val code: String? = json["code"]
         val phoneNumber: String? = json["phoneNumber"]
         val socialId: String? = json["socialId"]
@@ -108,7 +108,7 @@ class RegisterController {
     }
 
     @RequestMapping(value = ["/customer/email"], method = [RequestMethod.POST])
-    fun registerCustomer(@RequestBody json: Map<String, String>): Response<AccountDTO> {
+    fun registerCustomer(@RequestBody json: Map<String, String>): Response {
         Assert.isTrue(!json.isNullOrEmpty(), "Missing json.")
         Assert.isTrue(json.containsKey("email"), "Missing email.")
         Assert.isTrue(json.containsKey("password"), "Missing password.")

@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: gateway
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
   redis:
     database: 2
     host: 127.0.0.1
@@ -27,6 +32,6 @@ zuul:
       serviceId: auth-service
       path: /auth/**
     media-service:
-      serviceId: media-service
-      path: /media/**
+      serviceId: storage-service
+      path: /storage/**
   sensitive-headers: Cookie,Set-Cookie
