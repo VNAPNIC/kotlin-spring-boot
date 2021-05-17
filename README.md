@@ -1,6 +1,9 @@
 #App Cleaner
 
 ###Redis
+
+
+##### Linux
 ```
 sudo apt-get update
 sudo apt-get install build-essential tcl
@@ -19,4 +22,15 @@ redis-cli ping
 redis-cli info
 redis-cli info stats
 redis-cli info server
+```
+
+##### WSL
+
+```
+sudo apt update && apt upgrade
+sudo apt install redis-server
+sudo nano /etc/redis/redis.conf
+sudo service redis-server start
+redis-cli
+sudo service redis-server restart
 ```
