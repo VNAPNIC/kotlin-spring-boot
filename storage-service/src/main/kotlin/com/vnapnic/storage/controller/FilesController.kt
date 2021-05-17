@@ -1,11 +1,11 @@
 package com.vnapnic.storage.controller
 
-import com.sun.xml.internal.ws.server.UnsupportedMediaException
 import com.vnapnic.common.models.ErrorCode
 import com.vnapnic.common.models.Response
 import com.vnapnic.common.models.ResultCode
 import com.vnapnic.common.service.JWTService
 import com.vnapnic.common.utils.JWTUtils
+import com.vnapnic.common.exception.UnsupportedMediaType
 import com.vnapnic.storage.services.FilesStorageService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +33,7 @@ class FilesController {
             val accountId = jwtService.parseJWT(acceptToken)
             val avatarInfo = storageService.saveAvatar(accountId, file)
             Response.success(data = avatarInfo)
-        } catch (e: UnsupportedMediaException) {
+        } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
             Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
         } catch (e: Exception) {
@@ -51,7 +51,7 @@ class FilesController {
             val accountId = jwtService.parseJWT(acceptToken)
             val fileInfo = storageService.saveFiles(accountId, file)
             Response.success(data = fileInfo)
-        } catch (e: UnsupportedMediaException) {
+        } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
             Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
         } catch (e: Exception) {

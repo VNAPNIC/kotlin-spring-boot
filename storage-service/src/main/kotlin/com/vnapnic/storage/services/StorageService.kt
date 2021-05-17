@@ -1,6 +1,5 @@
 package com.vnapnic.storage.services
 
-import com.sun.xml.internal.ws.server.UnsupportedMediaException
 import com.vnapnic.common.utils.ImageConverter
 import com.vnapnic.common.utils.ImageUtils
 import com.vnapnic.common.utils.ImageUtils.AVATAR_URL
@@ -10,6 +9,7 @@ import com.vnapnic.common.utils.ImageUtils.imagePath
 import com.vnapnic.common.utils.ImageUtils.videoPath
 import com.vnapnic.common.db.files.AvatarInfo
 import com.vnapnic.common.db.files.FileInfo
+import com.vnapnic.common.exception.UnsupportedMediaType
 import com.vnapnic.storage.repositories.AvatarRepository
 import com.vnapnic.storage.repositories.FilesRepository
 import org.apache.tomcat.util.http.fileupload.FileUploadException
@@ -83,11 +83,11 @@ class FilesStorageServiceImpl : FilesStorageService {
     @Throws(Exception::class)
     override fun saveAvatar(accountId: String?, multipartFile: MultipartFile): AvatarInfo {
         if (multipartFile.originalFilename == null)
-            throw UnsupportedMediaException("Upload file fail.")
+            throw UnsupportedMediaType("Upload file fail.")
         if (ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() != "png"
                 && ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() != "jpg"
                 && ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() != "jpeg"
-        ) throw UnsupportedMediaException("Upload file fail.")
+        ) throw UnsupportedMediaType("Upload file fail.")
 
         val result = Files.copy(multipartFile.inputStream, avatarPath.resolve(multipartFile.originalFilename), StandardCopyOption.REPLACE_EXISTING)
 
@@ -114,7 +114,7 @@ class FilesStorageServiceImpl : FilesStorageService {
     @Throws(Exception::class)
     override fun saveFiles(accountId: String?, multipartFile: MultipartFile): FileInfo {
         if (multipartFile.originalFilename == null)
-            throw UnsupportedMediaException("Upload file fail.")
+            throw UnsupportedMediaType("Upload file fail.")
 
         return if (ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "png"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "jpg"
@@ -125,7 +125,7 @@ class FilesStorageServiceImpl : FilesStorageService {
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "m4v"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "mov")
             saveVideo(accountId, multipartFile)
-        else throw UnsupportedMediaException("Upload file fail.")
+        else throw UnsupportedMediaType("Upload file fail.")
     }
 
     @Throws(Exception::class)
