@@ -9,12 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "account")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder(
-        "id",
-        "username",
-        "password",
-        "email",
-        "active")
 data class Account(
 
         @JsonProperty("id")
