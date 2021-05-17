@@ -3,6 +3,7 @@ package com.vnapnic.auth.controllers
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.auth.services.SequenceGeneratorService
 import com.vnapnic.common.db.Account
+import com.vnapnic.common.db.Role
 import com.vnapnic.common.dto.AccountDTO
 import com.vnapnic.common.models.ErrorCode
 import com.vnapnic.common.models.Response
@@ -34,13 +35,8 @@ class RegisterController {
         val socialId: String? = json["socialId"]
         val email: String? = json["email"]
         val password: String? = json["password"]
-        val cccdFront: String? = json["cccdFront"]
-        val cccdBack: String? = json["cccdBack"]
 
-        log.info(String.format(
-                "request with %s %s %s %s %s %s", email,
-                phoneNumber, socialId, email, password, cccdFront, cccdBack)
-        )
+        log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
 
         if (code != null || code != "") {
             if (code?.startsWith("S") == false)
@@ -72,9 +68,8 @@ class RegisterController {
                 socialId = socialId,
                 email = email,
                 password = service.encryptPassword(password),
-                cccdFront = cccdFront,
-                cccdBack = cccdBack,
-                staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
+                staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}"),
+                role = Role.STAFF
         ))
 
         val account = service.byEmail(email)
@@ -84,7 +79,8 @@ class RegisterController {
                 email = account?.email,
                 active = account?.active,
                 verified = account?.verified,
-                staffId = account?.staffId
+                staffId = account?.staffId,
+                role = account?.role
         )
 
         return Response.success(data = accountDTO)
@@ -107,7 +103,7 @@ class RegisterController {
         }
     }
 
-    @RequestMapping(value = ["/customer/email"], method = [RequestMethod.POST])
+    @RequestMapping(value = ["/customer"], method = [RequestMethod.POST])
     fun registerCustomer(@RequestBody json: Map<String, String>): Response {
         Assert.isTrue(!json.isNullOrEmpty(), "Missing json.")
         Assert.isTrue(json.containsKey("email"), "Missing email.")
@@ -117,13 +113,8 @@ class RegisterController {
         val socialId: String? = json["socialId"]
         val email: String? = json["email"]
         val password: String? = json["password"]
-        val cccdFront: String? = json["cccdFront"]
-        val cccdBack: String? = json["cccdBack"]
 
-        log.info(String.format(
-                "request with %s %s %s %s %s %s", email,
-                phoneNumber, socialId, email, password, cccdFront, cccdBack)
-        )
+        log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
 
         if (phoneNumber == null || phoneNumber == "") {
             return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
@@ -142,8 +133,7 @@ class RegisterController {
                 socialId = socialId,
                 email = email,
                 password = service.encryptPassword(password),
-                cccdFront = cccdFront,
-                cccdBack = cccdBack
+                role = Role.CUSTOMER
         ))
 
         val account = service.byEmail(email)
@@ -152,7 +142,8 @@ class RegisterController {
                 socialId = account?.socialId,
                 email = account?.email,
                 active = account?.active,
-                verified = account?.verified
+                verified = account?.verified,
+                role = account?.role
         )
 
         return Response.success(data = accountDTO)

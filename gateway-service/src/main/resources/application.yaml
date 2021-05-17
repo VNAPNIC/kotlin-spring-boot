@@ -34,4 +34,7 @@ zuul:
     media-service:
       serviceId: storage-service
       path: /storage/**
+    user-service:
+      serviceId: user-service
+      path: /user/**
   sensitive-headers: Cookie,Set-Cookie

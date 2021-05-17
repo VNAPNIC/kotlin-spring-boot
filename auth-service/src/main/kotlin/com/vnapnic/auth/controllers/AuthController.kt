@@ -52,7 +52,8 @@ class AuthController {
                     socialId = account?.socialId,
                     email = account?.email,
                     active = account?.active,
-                    verified = account?.verified
+                    verified = account?.verified,
+                    role = account?.role
             )
 
             // Validate
