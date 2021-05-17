@@ -1,9 +1,6 @@
 #App Cleaner
 
-# kotlin-spring-boot
-Server res api use kotlin spring boot
-
-#Redis
+###Redis
 ```
 sudo apt-get update
 sudo apt-get install build-essential tcl
@@ -12,7 +9,7 @@ wget https://download.redis.io/releases/redis-6.2.1.tar.gz
 tar xzf redis-6.2.1.tar.gz
 cd redis-6.2.1/
 make
-make socail
+make cleaner
 
 sudo service redis-server restart
 redis-server
