@@ -31,6 +31,7 @@ sudo apt update && apt upgrade
 sudo apt install redis-server
 sudo nano /etc/redis/redis.conf
 sudo service redis-server start
+redis-server
 redis-cli
 sudo service redis-server restart
 ```
