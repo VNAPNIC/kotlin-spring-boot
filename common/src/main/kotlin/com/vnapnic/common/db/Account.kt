@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "account")
@@ -32,8 +33,8 @@ data class Account(
         var staffId: String = "",
         @JsonProperty("role")
         var role: Role? = Role.UNKNOWN,
-        @JsonProperty("info")
-        var info: UserInfo? = null
+        @DBRef(db="user")
+        var info: User? = null
 ) {
     companion object {
         @Transient

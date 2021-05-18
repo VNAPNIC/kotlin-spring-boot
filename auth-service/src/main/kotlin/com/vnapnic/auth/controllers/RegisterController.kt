@@ -4,6 +4,8 @@ import com.vnapnic.auth.services.AuthService
 import com.vnapnic.auth.services.SequenceGeneratorService
 import com.vnapnic.common.db.Account
 import com.vnapnic.common.db.Role
+import com.vnapnic.common.db.User
+import com.vnapnic.common.db.files.AvatarInfo
 import com.vnapnic.common.dto.AccountDTO
 import com.vnapnic.common.models.ErrorCode
 import com.vnapnic.common.models.Response
@@ -69,7 +71,8 @@ class RegisterController {
                 email = email,
                 password = service.encryptPassword(password),
                 staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}"),
-                role = Role.STAFF
+                role = Role.STAFF,
+                info = User(firstName="hainam", lastName = "bui", avatar = AvatarInfo("1234354"))
         ))
 
         val account = service.byEmail(email)
