@@ -1,0 +1,19 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+server:
+  port: 8768
+spring:
+  application:
+    name: user-service
+  # Database
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/Cleaner
+  # Redis
+  redis:
+    database: 2
+    host: 127.0.0.1
+    port: 6379
+    timeout: 60000

@@ -1,8 +1,8 @@
-package com.vnapnic.user.controller
+package com.vnapnic.work.controller
 
 import org.springframework.stereotype.Controller
 
 @Controller
-class UserController {
+class ReportController {
 
 }
