@@ -48,7 +48,7 @@ class AuthController {
             val account = service.byEmail(email)
 
             accountDTO = AccountDTO(
-                    id = account?.id,
+                    id = account?._id,
                     socialId = account?.socialId,
                     email = account?.email,
                     active = account?.active,

@@ -1,11 +1,12 @@
 package com.vnapnic.auth.controllers
 
+import com.vnapnic.common.exception.SequenceException
 import com.vnapnic.auth.services.AuthService
-import com.vnapnic.auth.services.SequenceGeneratorService
+import com.vnapnic.auth.services.StaffSequenceGeneratorService
+import com.vnapnic.auth.services.UserSequenceGeneratorService
 import com.vnapnic.common.db.Account
 import com.vnapnic.common.db.Role
 import com.vnapnic.common.db.User
-import com.vnapnic.common.db.files.AvatarInfo
 import com.vnapnic.common.dto.AccountDTO
 import com.vnapnic.common.models.ErrorCode
 import com.vnapnic.common.models.Response
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
-
 @RestController
 @RequestMapping("/register")
 class RegisterController {
@@ -28,7 +28,10 @@ class RegisterController {
     lateinit var service: AuthService
 
     @Autowired
-    lateinit var sequenceService: SequenceGeneratorService
+    lateinit var staffSequenceService: StaffSequenceGeneratorService
+
+    @Autowired
+    lateinit var userSequenceService: UserSequenceGeneratorService
 
     @RequestMapping(value = ["/staff"], method = [RequestMethod.POST])
     fun registerStaffWithEmail(@RequestBody json: Map<String, String>): Response {
@@ -64,45 +67,55 @@ class RegisterController {
         if (service.existsByPhoneNumber(phoneNumber)) {
             return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
         }
+        try {
+            val staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
+            val userId = userSequenceService.nextSequenceId(User.SEQUENCE_NAME).toString()
 
-        service.save(Account(
-                phoneNumber = phoneNumber,
-                socialId = socialId,
-                email = email,
-                password = service.encryptPassword(password),
-                staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}"),
-                role = Role.STAFF,
-                info = User(firstName="hainam", lastName = "bui", avatar = AvatarInfo("1234354"))
-        ))
+            service.saveAccount(Account(
+                    phoneNumber = phoneNumber,
+                    socialId = socialId,
+                    email = email,
+                    password = service.encryptPassword(password),
+                    staffId = sequenceIDToStaffId(staffId),
+                    role = Role.STAFF,
+                    info = User(id = userId)
+            ))
 
-        val account = service.byEmail(email)
-        val accountDTO = AccountDTO(
-                id = account?.id,
-                socialId = account?.socialId,
-                email = account?.email,
-                active = account?.active,
-                verified = account?.verified,
-                staffId = account?.staffId,
-                role = account?.role
-        )
+            val account = service.byEmail(email)
+            val accountDTO = AccountDTO(
+                    id = account?._id,
+                    socialId = account?.socialId,
+                    email = account?.email,
+                    active = account?.active,
+                    verified = account?.verified,
+                    staffId = account?.staffId,
+                    role = account?.role,
+                    user = account?.info
+            )
 
-        return Response.success(data = accountDTO)
+            return Response.success(data = accountDTO)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
+        }
     }
 
-    private fun sequenceIDToStaffId(code: String): String = when (
-        val sequenceID = sequenceService.nextSequenceId(Account.SEQUENCE_NAME) ?: 1
-        ) {
-        in 100..999 -> {
-            "$code-0${sequenceID}"
-        }
-        in 10..99 -> {
-            "$code-00${sequenceID}"
-        }
-        in 1..9 -> {
-            "$code-000${sequenceID}"
-        }
-        else -> {
-            "$code-$sequenceID"
+    private fun sequenceIDToStaffId(code: String): String {
+        val sequenceID = staffSequenceService.nextSequenceId(Account.SEQUENCE_NAME)
+                ?: throw SequenceException("can't create staffID")
+        return when (sequenceID) {
+            in 100..999 -> {
+                "$code-0${sequenceID}"
+            }
+            in 10..99 -> {
+                "$code-00${sequenceID}"
+            }
+            in 1..9 -> {
+                "$code-000${sequenceID}"
+            }
+            else -> {
+                "$code-$sequenceID"
+            }
         }
     }
 
@@ -131,7 +144,7 @@ class RegisterController {
             return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
         }
 
-        service.save(Account(
+        service.saveAccount(Account(
                 phoneNumber = phoneNumber,
                 socialId = socialId,
                 email = email,
@@ -141,7 +154,7 @@ class RegisterController {
 
         val account = service.byEmail(email)
         val accountDTO = AccountDTO(
-                id = account?.id,
+                id = account?._id,
                 socialId = account?.socialId,
                 email = account?.email,
                 active = account?.active,

@@ -1,21 +1,19 @@
-package com.vnapnic.auth.services
+package com.vnapnic.common.service
 
-import com.vnapnic.auth.exception.SequenceException
 import com.vnapnic.common.db.SequenceId
+import com.vnapnic.common.exception.SequenceException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.stereotype.Service
 
 interface SequenceGeneratorService {
     fun nextSequenceId(key: String): Int?
 }
 
-@Service
-class SequenceGeneratorServiceImpl : SequenceGeneratorService{
+open class SequenceGeneratorServiceImpl : SequenceGeneratorService {
     @Autowired
     lateinit var mongoOperations: MongoOperations
 
@@ -41,6 +39,6 @@ class SequenceGeneratorServiceImpl : SequenceGeneratorService{
                         SequenceId::class.java)
                 ?: throw SequenceException("Unable to get sequence id for key : $key")
 
-        return sequenceId.seq ?: 1
+        return sequenceId.seq
     }
 }

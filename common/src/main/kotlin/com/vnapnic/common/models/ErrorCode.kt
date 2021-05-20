@@ -1,6 +1,9 @@
 package com.vnapnic.common.models
 
 enum class ErrorCode(val code: Long, val message: String) {
+
+    SERVER_UNKNOWN_ERROR(1000,"Server unknown error."),
+
     EMAIL_PASSWORD_NOT_CORRECT(1001, "Email/Password is not correct."),
     SOCIAL_PASSWORD_NOT_CORRECT(1002, "Social/Password is not correct."),
 

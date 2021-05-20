@@ -10,9 +10,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "account")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Account(
-        @JsonProperty("id")
+        @JsonProperty("_id")
         @Id
-        var id: String = "",
+        var _id: String = "",
         @JsonProperty("phoneNumber")
         var phoneNumber: String? = null,
         @JsonProperty("socialId")
@@ -33,11 +33,12 @@ data class Account(
         var staffId: String = "",
         @JsonProperty("role")
         var role: Role? = Role.UNKNOWN,
-        @DBRef(db="user")
+        @JsonProperty("info")
+        @DBRef
         var info: User? = null
 ) {
     companion object {
         @Transient
-        const val SEQUENCE_NAME = "account_sequence"
+        const val SEQUENCE_NAME = "staff_id_sequence"
     }
 }
