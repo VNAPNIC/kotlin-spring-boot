@@ -1,4 +1,4 @@
-package com.vnapnic.common.db
+package com.vnapnic.common.enums
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import org.springframework.data.mongodb.core.mapping.Document

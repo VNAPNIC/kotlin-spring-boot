@@ -2,6 +2,7 @@ package com.vnapnic.common.db
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.vnapnic.common.enums.Role
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.DBRef
@@ -27,10 +28,14 @@ data class Account(
         var cccdBack: String? = null,
         @JsonProperty("active")
         var active: Boolean = false,
-        @JsonProperty("verified") // Email verification passed
-        var verified: Boolean = false,
+        @JsonProperty("blocked")
+        var blocked: Boolean = false,
+        @JsonProperty("emailVerified") // Email verification passed
+        var emailVerified: Boolean = false,
         @JsonProperty("staffId")
-        var staffId: String = "",
+        var staffId: String? = null,
+        @JsonProperty("devices")
+        var devices: ArrayList<Device?>? = null,
         @JsonProperty("role")
         var role: Role? = Role.UNKNOWN,
         @JsonProperty("info")
@@ -40,5 +45,20 @@ data class Account(
     companion object {
         @Transient
         const val SEQUENCE_NAME = "staff_id_sequence"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Account
+
+        if (_id != other._id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return _id.hashCode()
     }
 }

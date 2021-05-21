@@ -1,49 +1,118 @@
 package com.vnapnic.auth.services
 
 import com.vnapnic.auth.repositories.AccountRepository
-import com.vnapnic.auth.repositories.UserRepository
+import com.vnapnic.auth.repositories.DeviceRepository
 import com.vnapnic.common.db.Account
+import com.vnapnic.common.db.Device
 import com.vnapnic.common.db.User
+import com.vnapnic.common.dto.AccountDTO
+import com.vnapnic.common.enums.Platform
+import com.vnapnic.common.enums.Role
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 interface AuthService {
-    fun bySocialId(socialId: String?): Account?
-    fun byEmail(email: String?): Account?
+    fun findBySocialId(socialId: String?): Account?
+    fun findByEmail(email: String?): Account?
 
     fun existsBySocialId(socialId: String?): Boolean
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean
 
-    fun saveAccount(account: Account?): Account?
-    fun saveUserInfo(user: User?): User?
+    fun save(staffId: String?,
+             phoneNumber: String?,
+             socialId: String?,
+             email: String?,
+             password: String?,
+             role: Role?,
+             userId: String?,
+             deviceId: String?,
+             deviceName: String?,
+             platform: String?): AccountDTO?
+
+    fun update(rawAccount: Account, device: Device) : AccountDTO?
+
     fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
 }
 
 @Service
-class AuthServiceImpl :  AuthService {
+class AuthServiceImpl : AuthService {
 
     @Autowired
     lateinit var accountRepository: AccountRepository
 
     @Autowired
-    lateinit var userRepository: UserRepository
+    lateinit var deviceRepository: DeviceRepository
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
-    override fun bySocialId(socialId: String?): Account? = accountRepository.findBySocialId(socialId)
+    override fun findBySocialId(socialId: String?): Account? = accountRepository.findBySocialId(socialId)
 
-    override fun byEmail(email: String?): Account? = accountRepository.findByEmail(email)
+    override fun findByEmail(email: String?): Account? = accountRepository.findByEmail(email)
 
     override fun existsBySocialId(socialId: String?): Boolean = accountRepository.existsBySocialId(socialId)
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
     override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
 
-    override fun saveAccount(account: Account?): Account? = if (account != null) accountRepository.save(account) else null
-    override fun saveUserInfo(user: User?): User? = if (user !=null) userRepository.save(user) else null
+    override fun save(staffId: String?,
+                      phoneNumber: String?,
+                      socialId: String?,
+                      email: String?,
+                      password: String?,
+                      role: Role?,
+                      userId: String?,
+                      deviceId: String?,
+                      deviceName: String?,
+                      platform: String?): AccountDTO? {
+
+        // create and save device
+        val devices = arrayListOf<Device?>()
+        val device = deviceRepository.save(Device(
+                deviceId = deviceId,
+                deviceName = deviceName,
+                platform = Platform.valueOf(platform ?: "")))
+        devices.add(device)
+
+        val account = accountRepository.save(Account(
+                phoneNumber = phoneNumber,
+                socialId = socialId,
+                email = email,
+                password = encryptPassword(password),
+                staffId = staffId,
+                role = role,
+                info = User(id = userId),
+                devices = devices
+        ))
+
+        return AccountDTO(
+                socialId = account.socialId,
+                email = account.email,
+                phoneNumber = account.phoneNumber,
+                active = account.active,
+                verified = account.emailVerified,
+                staffId = account.staffId,
+                role = account.role,
+                user = account.info,
+                devices = account.devices
+        )
+    }
+
+    override fun update(rawAccount: Account, device: Device): AccountDTO? {
+        deviceRepository.save(device)
+        val account =  accountRepository.save(rawAccount)
+        return AccountDTO(
+                id = account._id,
+                socialId = account.socialId,
+                email = account.email,
+                active = account.active,
+                verified = account.emailVerified,
+                role = account.role,
+                devices = account.devices
+        )
+    }
 
     override fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean = passwordEncoder.matches(rawPassword, encodedPassword)
     override fun encryptPassword(password: String?): String? = passwordEncoder.encode(password)

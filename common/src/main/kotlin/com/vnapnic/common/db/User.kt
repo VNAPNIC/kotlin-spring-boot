@@ -3,6 +3,7 @@ package com.vnapnic.common.db
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.vnapnic.common.db.files.AvatarInfo
+import com.vnapnic.common.enums.Gender
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.Document
@@ -12,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class User(
         @JsonProperty("id")
         @Id
-        var id: String = "",
+        var id: String? = null,
         @JsonProperty("firstName")
         var firstName: String? = null,
         @JsonProperty("lastName")
@@ -24,7 +25,9 @@ data class User(
         @JsonProperty("gender")
         var gender: Gender? = Gender.OTHER,
         @JsonProperty("description")
-        var description: String? = null
+        var description: String? = null,
+        @JsonProperty("avatar")
+        var avatar: AvatarInfo? = null
 ) {
     companion object {
         @Transient

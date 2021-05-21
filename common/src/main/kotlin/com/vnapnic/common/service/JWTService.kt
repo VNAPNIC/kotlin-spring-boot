@@ -1,6 +1,5 @@
 package com.vnapnic.common.service
 
-import com.vnapnic.common.dto.AccountDTO
 import com.vnapnic.common.property.ApplicationProperty
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -13,7 +12,7 @@ import javax.security.sasl.AuthenticationException
 import javax.xml.bind.DatatypeConverter
 
 interface JWTService {
-    fun generateJWT(accountDTO: AccountDTO?): String?
+    fun generateJWT(accountId: String?, deviceId: String?): String?
     fun parseJWT(token: String?): String?
 }
 
@@ -26,7 +25,9 @@ open class JWTServiceImpl : JWTService {
     @Autowired
     lateinit var redisService: RedisService
 
-    override fun generateJWT(accountDTO: AccountDTO?): String? {
+    override fun generateJWT(accountId: String?, deviceId: String?): String? {
+        if (accountId == null || deviceId == null)
+            throw AuthenticationException("Token is expired.")
 
         //The JWT signature algorithm we will be using to sign the token
         val signatureAlgorithm: SignatureAlgorithm = SignatureAlgorithm.HS256
@@ -43,7 +44,7 @@ open class JWTServiceImpl : JWTService {
         val builder = Jwts.builder()
                 .setId(jwtId)
                 .setIssuedAt(now)
-                .setSubject(accountDTO?.id) // User id
+                .setSubject("$accountId+$deviceId") // AccountID + DeviceId
                 .setIssuer(property.jwtIssuer)
                 .setHeaderParam("Authorization", "JWT")
                 .signWith(signatureAlgorithm, signingKey)
@@ -57,21 +58,16 @@ open class JWTServiceImpl : JWTService {
 
         val jwt = builder.compact()
         // Remove previous token record
-        val redis = redisService.gets("account:tkn:${accountDTO?.id}")?.forEach { _ ->
-            val id = redisService["account:tkn:${accountDTO?.id}"]
+        redisService.gets("account:tkn:$accountId+$deviceId")?.forEach { _ ->
+            val id = redisService["account:tkn:$accountId+$deviceId"]
             if (id?.equals(jwtId) == false) {
                 redisService.del("tkn:${id}")
             }
         }
 
-        log.info("redisssssssssssssssssss: $redis")
-        log.info("jwtIddddddddddddddddddd: $jwtId")
-
-        accountDTO?.id?.let { id ->
-            redisService["tkn:$jwtId"] = jwt
-            redisService["account:tkn:$id"] = jwtId
-            redisService.expire("tkn:$jwtId", nowMillis + (property.jwtTTL ?: 0))
-        } ?: throw AuthenticationException("Token is expired.")
+        redisService["tkn:$jwtId"] = jwt
+        redisService["account:tkn:$accountId+$deviceId"] = jwtId
+        redisService.expire("tkn:$jwtId", nowMillis + (property.jwtTTL ?: 0))
 
         return jwt
     }
@@ -85,9 +81,6 @@ open class JWTServiceImpl : JWTService {
         if (jwsClaims.header.getAlgorithm() != SignatureAlgorithm.HS256.value)
             throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
         val claims = jwsClaims.body
-
-        log.info("jwtIddddddddddddddddddd: ${claims.id}")
-        log.info("accountIddddddddddddddd: ${jwsClaims.body.subject}")
 
         // Find record from redis
         val record: String? = redisService["tkn:" + claims.id] as? String
