@@ -68,8 +68,6 @@ class RegisterController {
 
             // create staff Id
             val staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
-            // create userId
-            val userId = sequenceGeneratorService.nextSequenceId(User.SEQUENCE_NAME).toString()
 
             val accountDTO = authService.save(staffId = staffId,
                     phoneNumber = phoneNumber,
@@ -77,7 +75,6 @@ class RegisterController {
                     email = email,
                     password = password,
                     role = Role.STAFF,
-                    userId = userId,
                     deviceId = deviceId,
                     deviceName = deviceName,
                     platform = platform)
@@ -134,9 +131,6 @@ class RegisterController {
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
             }
 
-            // create userId
-            val userId = sequenceGeneratorService.nextSequenceId(User.SEQUENCE_NAME).toString()
-
             val accountDTO = authService.save(
                     staffId = null,
                     phoneNumber = phoneNumber,
@@ -144,7 +138,6 @@ class RegisterController {
                     email = email,
                     password = password,
                     role = Role.CUSTOMER,
-                    userId = userId,
                     deviceId = deviceId,
                     deviceName = deviceName,
                     platform = platform)

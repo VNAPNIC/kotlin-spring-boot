@@ -20,13 +20,20 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+
 hystrix:
   command:
     default:
       execution:
         isolation:
           thread:
-            timeoutInMilliseconds: 11000
+            timeoutInMilliseconds: 5000
+
 ribbon:
   ConnectTimeout: 3000
   ReadTimeout: 60000
@@ -42,10 +49,20 @@ zuul:
     auth-service:
       serviceId: auth-service
       path: /auth/**
-    media-service:
+      filters:
+        - name: CircuitBreaker
+          args:
+            name: auth-service
+            fallbackuri: forward:/authFallBack
+    storage-service:
       serviceId: storage-service
       path: /storage/**
     user-service:
       serviceId: user-service
       path: /user/**
+      filters:
+        - name: CircuitBreaker
+          args:
+            name: user-service
+            fallbackuri: forward:/userFallBack
   sensitive-headers: Cookie,Set-Cookie

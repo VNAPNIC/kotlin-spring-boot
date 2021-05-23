@@ -7,7 +7,7 @@ interface UserService {
 }
 
 @Service
-class UserServiceImpl() : UserService {
+class UserServiceImpl : UserService {
 
     override fun updateAvatar(accountId: String?, avatarId: String?) {
     }

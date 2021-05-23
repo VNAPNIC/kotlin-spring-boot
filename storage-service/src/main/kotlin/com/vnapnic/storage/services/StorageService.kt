@@ -1,5 +1,6 @@
 package com.vnapnic.storage.services
 
+import com.vnapnic.common.db.User
 import com.vnapnic.common.utils.ImageConverter
 import com.vnapnic.common.utils.ImageUtils
 import com.vnapnic.common.utils.ImageUtils.AVATAR_URL
@@ -10,12 +11,18 @@ import com.vnapnic.common.utils.ImageUtils.videoPath
 import com.vnapnic.common.db.files.AvatarInfo
 import com.vnapnic.common.db.files.FileInfo
 import com.vnapnic.common.exception.UnsupportedMediaType
+import com.vnapnic.storage.repositories.AccountRepository
 import com.vnapnic.storage.repositories.AvatarRepository
 import com.vnapnic.storage.repositories.FilesRepository
+import com.vnapnic.storage.repositories.UserRepository
 import org.apache.tomcat.util.http.fileupload.FileUploadException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
+import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
@@ -30,17 +37,19 @@ import java.util.stream.Stream
 interface FilesStorageService {
     fun init()
 
-    @Throws(Exception::class)
-    fun saveAvatar(accountId: String?, multipartFile: MultipartFile): AvatarInfo
+    fun saveAvatarToUser(avatarInfo: AvatarInfo)
 
     @Throws(Exception::class)
-    fun saveFiles(accountId: String?, multipartFile: MultipartFile): FileInfo
+    fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): AvatarInfo
 
     @Throws(Exception::class)
-    fun saveImage(accountId: String?, multipartFile: MultipartFile): FileInfo
+    fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo
 
     @Throws(Exception::class)
-    fun saveVideo(accountId: String?, multipartFile: MultipartFile): FileInfo
+    fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo
+
+    @Throws(Exception::class)
+    fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo
 
     fun load(filename: String?): Resource?
 
@@ -59,6 +68,15 @@ class FilesStorageServiceImpl : FilesStorageService {
 
     @Autowired
     lateinit var filesRepository: FilesRepository
+
+    @Autowired
+    lateinit var userRepository: UserRepository
+
+    @Autowired
+    lateinit var accountRepository: AccountRepository
+
+    @Autowired
+    lateinit var mongoOperations: MongoOperations
 
     override fun init() {
         try {
@@ -81,7 +99,17 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveAvatar(accountId: String?, multipartFile: MultipartFile): AvatarInfo {
+    override fun saveAvatarToUser(avatarInfo: AvatarInfo) {
+        val account = avatarInfo.recorder?.let { accountId -> accountRepository.findById(accountId) }
+                ?: throw Exception("can't save avatar to user")
+        val user = account.get().info
+        val query = Query(Criteria.where("_id").`is`(user?._id))
+        val update = Update().set("avatar", avatarInfo)
+        mongoOperations.updateFirst(query, update, User::class.java)
+    }
+
+    @Throws(Exception::class)
+    override fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): AvatarInfo {
         if (multipartFile.originalFilename == null)
             throw UnsupportedMediaType("Upload file fail.")
         if (ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() != "png"
@@ -99,6 +127,7 @@ class FilesStorageServiceImpl : FilesStorageService {
             val file = ImageConverter.convertType(inputImage = inputImage, outputImage = outputImage, formatName = formatName)
             val avatarInfo = AvatarInfo()
             avatarInfo.recorder = accountId
+            avatarInfo.deviceId = deviceId
             avatarInfo.recordDate = Date(file.name.split(".")[0].toLong())
             avatarInfo.path = "$AVATAR_URL\\${file.name}"
             avatarInfo.fileName = file.name
@@ -112,24 +141,24 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveFiles(accountId: String?, multipartFile: MultipartFile): FileInfo {
+    override fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo {
         if (multipartFile.originalFilename == null)
             throw UnsupportedMediaType("Upload file fail.")
 
         return if (ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "png"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "jpg"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "jpeg")
-            saveImage(accountId, multipartFile)
+            saveImage(accountId, deviceId, multipartFile)
         else if (ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "mp4"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "avi"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "m4v"
                 || ImageUtils.getFileExtension(multipartFile.originalFilename)?.toLowerCase() == "mov")
-            saveVideo(accountId, multipartFile)
+            saveVideo(accountId, deviceId, multipartFile)
         else throw UnsupportedMediaType("Upload file fail.")
     }
 
     @Throws(Exception::class)
-    override fun saveImage(accountId: String?, multipartFile: MultipartFile): FileInfo {
+    override fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo {
         val result = Files.copy(multipartFile.inputStream, imagePath.resolve(multipartFile.originalFilename), StandardCopyOption.REPLACE_EXISTING)
         val inputImage = imagePath.resolve(multipartFile.originalFilename)
         val outputImage = imagePath.resolve("${System.currentTimeMillis()}.png")
@@ -138,6 +167,7 @@ class FilesStorageServiceImpl : FilesStorageService {
             val file = ImageConverter.convertType(inputImage = inputImage.toAbsolutePath().toString(), outputImage = outputImage.toAbsolutePath().toString(), formatName = formatName)
             val fileInfo = FileInfo()
             fileInfo.recorder = accountId
+            fileInfo.deviceId = deviceId
             fileInfo.recordDate = Date(file.name.split(".")[0].toLong())
             fileInfo.path = "$IMAGE_URL\\${file.name}"
             fileInfo.fileName = file.name
@@ -151,7 +181,7 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveVideo(accountId: String?, multipartFile: MultipartFile): FileInfo {
+    override fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo {
         val result = Files.copy(multipartFile.inputStream, videoPath.resolve(multipartFile.originalFilename), StandardCopyOption.REPLACE_EXISTING)
 
         val formatName = ImageUtils.getFileExtension(multipartFile.originalFilename)
@@ -161,6 +191,7 @@ class FilesStorageServiceImpl : FilesStorageService {
             val file = File(Files.move(inputImage, outputImage, StandardCopyOption.REPLACE_EXISTING).toUri())
             val fileInfo = FileInfo()
             fileInfo.recorder = accountId
+            fileInfo.deviceId = deviceId
             fileInfo.recordDate = Date(file.name.split(".")[0].toLong())
             fileInfo.path = "$IMAGE_URL\\${file.name}"
             fileInfo.fileName = file.name

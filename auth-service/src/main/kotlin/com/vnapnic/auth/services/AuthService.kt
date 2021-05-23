@@ -2,6 +2,7 @@ package com.vnapnic.auth.services
 
 import com.vnapnic.auth.repositories.AccountRepository
 import com.vnapnic.auth.repositories.DeviceRepository
+import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.common.db.Account
 import com.vnapnic.common.db.Device
 import com.vnapnic.common.db.User
@@ -26,12 +27,11 @@ interface AuthService {
              email: String?,
              password: String?,
              role: Role?,
-             userId: String?,
              deviceId: String?,
              deviceName: String?,
              platform: String?): AccountDTO?
 
-    fun update(rawAccount: Account, device: Device) : AccountDTO?
+    fun updateDevices(rawAccount: Account, device: Device) : AccountDTO?
 
     fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
@@ -42,6 +42,9 @@ class AuthServiceImpl : AuthService {
 
     @Autowired
     lateinit var accountRepository: AccountRepository
+
+    @Autowired
+    lateinit var userRepository: UserRepository
 
     @Autowired
     lateinit var deviceRepository: DeviceRepository
@@ -63,7 +66,6 @@ class AuthServiceImpl : AuthService {
                       email: String?,
                       password: String?,
                       role: Role?,
-                      userId: String?,
                       deviceId: String?,
                       deviceName: String?,
                       platform: String?): AccountDTO? {
@@ -76,6 +78,9 @@ class AuthServiceImpl : AuthService {
                 platform = Platform.valueOf(platform ?: "")))
         devices.add(device)
 
+        // create and save user
+        val user = userRepository.save(User())
+
         val account = accountRepository.save(Account(
                 phoneNumber = phoneNumber,
                 socialId = socialId,
@@ -83,7 +88,7 @@ class AuthServiceImpl : AuthService {
                 password = encryptPassword(password),
                 staffId = staffId,
                 role = role,
-                info = User(id = userId),
+                info = user,
                 devices = devices
         ))
 
@@ -100,7 +105,7 @@ class AuthServiceImpl : AuthService {
         )
     }
 
-    override fun update(rawAccount: Account, device: Device): AccountDTO? {
+    override fun updateDevices(rawAccount: Account, device: Device): AccountDTO? {
         deviceRepository.save(device)
         val account =  accountRepository.save(rawAccount)
         return AccountDTO(

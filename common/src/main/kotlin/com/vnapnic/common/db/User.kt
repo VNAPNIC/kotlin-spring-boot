@@ -11,9 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "user")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class User(
-        @JsonProperty("id")
+        @JsonProperty("_id")
         @Id
-        var id: String? = null,
+        var _id: String? = null,
         @JsonProperty("firstName")
         var firstName: String? = null,
         @JsonProperty("lastName")
@@ -28,9 +28,4 @@ data class User(
         var description: String? = null,
         @JsonProperty("avatar")
         var avatar: AvatarInfo? = null
-) {
-    companion object {
-        @Transient
-        const val SEQUENCE_NAME = "user_sequence"
-    }
-}
+)

@@ -64,7 +64,7 @@ class AuthController {
 
             val jwt = jwtService.generateJWT(rawAccount._id, deviceId)
 
-            val accountDTO = authService.update(rawAccount, device)
+            val accountDTO = authService.updateDevices(rawAccount, device)
             return Response.success(data = accountDTO, token = jwt)
         } catch (e: Exception) {
             e.printStackTrace()

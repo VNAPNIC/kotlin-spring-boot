@@ -35,3 +35,45 @@ redis-server
 redis-cli
 sudo service redis-server restart
 ```
+
+```FLUSHDB``` – Deletes all keys from the connection's current database.
+
+```FLUSHALL``` – Deletes all keys from all databases.
+
+For example, in your shell:
+
+```
+redis-cli flushall
+```
+
+### Discovery service Eureka
+Hosts eureka server.
+
+PORT: 8761
+
+### Gateway service Zuul
+Gateway for microservies. It includes JWT and Rolebased Access.
+
+PORT: 8762
+
+### HystrixDashboard
+Provides Hystrix Dashboard to monitor services with alternate methods in case of cuircuit break.
+
+http://localhost:8763/hystrix
+
+PORT: 8763
+
+### Auth service
+Custom Service that provides future authentication.
+
+PORT: 8871
+
+### User service
+Custom Service that provides future user.
+
+PORT: 8872
+
+### Storage service
+Custom Service that provides future files.
+
+PORT: 8873
