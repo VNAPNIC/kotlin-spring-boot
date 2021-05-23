@@ -1,0 +1,21 @@
+server:
+  port: 8763
+#configure a list of hosts to allow connections to
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'hystrix.stream'
+      base-path: '/'
+    jmx:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+hystrix:
+  dashboard:
+    proxy-stream-allow-list:
+      - 'localhost'

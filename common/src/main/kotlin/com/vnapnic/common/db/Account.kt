@@ -2,18 +2,18 @@ package com.vnapnic.common.db
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import com.vnapnic.common.enums.Role
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "account")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Account(
-
-        @JsonProperty("id")
+        @JsonProperty("_id")
         @Id
-        var id: String = "",
+        var _id: String = "",
         @JsonProperty("phoneNumber")
         var phoneNumber: String? = null,
         @JsonProperty("socialId")
@@ -28,14 +28,37 @@ data class Account(
         var cccdBack: String? = null,
         @JsonProperty("active")
         var active: Boolean = false,
-        @JsonProperty("verified") // Email verification passed
-        var verified: Boolean = false,
-        @JsonProperty("verified") // Email verification passed
-
-        var staffId: String = ""
+        @JsonProperty("blocked")
+        var blocked: Boolean = false,
+        @JsonProperty("emailVerified") // Email verification passed
+        var emailVerified: Boolean = false,
+        @JsonProperty("staffId")
+        var staffId: String? = null,
+        @JsonProperty("devices")
+        var devices: ArrayList<Device?>? = null,
+        @JsonProperty("role")
+        var role: Role? = Role.UNKNOWN,
+        @JsonProperty("info")
+        @DBRef
+        var info: User? = null
 ) {
     companion object {
         @Transient
-        const val SEQUENCE_NAME = "account_sequence"
+        const val SEQUENCE_NAME = "staff_id_sequence"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Account
+
+        if (_id != other._id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return _id.hashCode()
     }
 }
