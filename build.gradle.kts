@@ -2,28 +2,25 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 import org.gradle.kotlin.dsl.version
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val spring_boot_version: String by project
-
 buildscript {
-    val springBootVersion = "2.2.5.RELEASE"
-    val junitPluginVersion = "1.0.9.RELEASE"
+    val springBootVersion = "2.3.4.RELEASE"
+    val dependencyManagementVersion = "1.0.11.RELEASE"
     project.extra.set("springBootVersion", springBootVersion)
 
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
-        classpath("io.spring.gradle:dependency-management-plugin:$junitPluginVersion")
+        classpath("io.spring.gradle:dependency-management-plugin:$dependencyManagementVersion")
     }
 }
 
 
 plugins {
-    val kotlinVersion = "1.3.72"
-    val springBootVersion = "2.2.5.RELEASE"
-    val dependencyManagementVersion = "1.0.10.RELEASE"
+    val kotlinVersion = "1.4.10"
+    val springBootVersion = "2.3.4.RELEASE"
+    val dependencyManagementVersion = "1.0.11.RELEASE"
     base
     kotlin("jvm") version kotlinVersion apply false
     kotlin("plugin.spring") version kotlinVersion apply false
-    kotlin("plugin.jpa") version kotlinVersion apply false
     id("org.springframework.boot") version springBootVersion apply false
     id("io.spring.dependency-management") version dependencyManagementVersion
 }
@@ -49,7 +46,6 @@ subprojects {
         plugin("org.jetbrains.kotlin.kapt")
         plugin("org.springframework.boot")
         plugin("org.jetbrains.kotlin.plugin.spring")
-        plugin("org.jetbrains.kotlin.plugin.jpa")
     }
     the<DependencyManagementExtension>().apply {
         imports {
@@ -66,7 +62,6 @@ subprojects {
     }
 
     tasks.withType<KotlinCompile>().configureEach {
-        println("Configuring $name in project ${project.name}...")
         kotlinOptions {
             jvmTarget = "1.8"
             freeCompilerArgs = listOf("-Xjsr305=strict")
