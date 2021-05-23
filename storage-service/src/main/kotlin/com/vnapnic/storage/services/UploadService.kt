@@ -14,11 +14,9 @@ import com.vnapnic.common.exception.UnsupportedMediaType
 import com.vnapnic.storage.repositories.AccountRepository
 import com.vnapnic.storage.repositories.AvatarRepository
 import com.vnapnic.storage.repositories.FilesRepository
-import com.vnapnic.storage.repositories.UserRepository
 import org.apache.tomcat.util.http.fileupload.FileUploadException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.io.Resource
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -28,15 +26,15 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.*
-import java.util.stream.Stream
+import kotlin.jvm.Throws
 
 interface FilesStorageService {
     fun init()
 
+    @Throws(Exception::class)
     fun saveAvatarToUser(avatarInfo: AvatarInfo)
 
     @Throws(Exception::class)
@@ -50,12 +48,6 @@ interface FilesStorageService {
 
     @Throws(Exception::class)
     fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfo
-
-    fun load(filename: String?): Resource?
-
-    fun deleteAll()
-
-    fun loadAll(): Stream<Path?>?
 }
 
 @Service
@@ -68,9 +60,6 @@ class FilesStorageServiceImpl : FilesStorageService {
 
     @Autowired
     lateinit var filesRepository: FilesRepository
-
-    @Autowired
-    lateinit var userRepository: UserRepository
 
     @Autowired
     lateinit var accountRepository: AccountRepository
@@ -202,18 +191,5 @@ class FilesStorageServiceImpl : FilesStorageService {
             Files.deleteIfExists(outputImage)
             throw FileUploadException("Upload file fail.")
         }
-    }
-
-    override fun load(filename: String?): Resource? {
-
-        return null
-    }
-
-    override fun deleteAll() {
-    }
-
-    override fun loadAll(): Stream<Path?>? {
-
-        return null
     }
 }
