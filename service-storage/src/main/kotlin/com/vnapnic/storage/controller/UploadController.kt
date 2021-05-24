@@ -40,14 +40,8 @@ class UploadController {
             val claims = jwtService.parseJWT(acceptToken)
             val accountId = claims?.get(ACCOUNT_ID)
             val deviceId = claims?.get(DEVICE_ID)
-            val avatarInfo = storageService.saveAvatar(accountId, deviceId, file)
-            storageService.saveAvatarToUser(avatarInfo)
-            Response.success(data = FileDTO(
-                    fileId = avatarInfo.id,
-                    fileName = avatarInfo.fileName,
-                    fileExtName = avatarInfo.fileExtName,
-                    contentType = avatarInfo.contentType
-            ))
+            val dto = storageService.saveAvatar(accountId, deviceId, file)
+            Response.success(data = dto)
         } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
             Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
@@ -66,13 +60,8 @@ class UploadController {
             val claims = jwtService.parseJWT(acceptToken)
             val accountId = claims?.get(ACCOUNT_ID)
             val deviceId = claims?.get(DEVICE_ID)
-            val fileInfo = storageService.saveFiles(accountId, deviceId, file)
-            Response.success(data = FileDTO(
-                    fileId = fileInfo.id,
-                    fileName = fileInfo.fileName,
-                    fileExtName = fileInfo.fileExtName,
-                    contentType = fileInfo.contentType
-            ))
+            val dto = storageService.saveFiles(accountId, deviceId, file)
+            Response.success(data = dto)
         } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
             Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)

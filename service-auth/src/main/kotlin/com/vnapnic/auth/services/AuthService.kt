@@ -4,17 +4,18 @@ import com.vnapnic.auth.repositories.AccountRepository
 import com.vnapnic.auth.repositories.DeviceRepository
 import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.common.dto.AccountDTO
-import com.vnapnic.database.enums.Platform
-import com.vnapnic.database.enums.Role
 import com.vnapnic.database.beans.AccountBean
 import com.vnapnic.database.beans.DeviceBean
 import com.vnapnic.database.beans.UserBean
+import com.vnapnic.database.enums.Platform
+import com.vnapnic.database.enums.Role
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 interface AuthService {
     fun findBySocialId(socialId: String?): AccountBean?
+    fun findByPhoneNumber(phoneNumber: String?): AccountBean?
     fun findByEmail(email: String?): AccountBean?
 
     fun existsBySocialId(socialId: String?): Boolean
@@ -31,7 +32,7 @@ interface AuthService {
              deviceName: String?,
              platform: String?): AccountDTO?
 
-    fun updateDevices(rawAccount: AccountBean, device: DeviceBean) : AccountDTO?
+    fun updateDevices(account: AccountBean, device: DeviceBean) : AccountDTO?
 
     fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
@@ -53,7 +54,7 @@ class AuthServiceImpl : AuthService {
     lateinit var passwordEncoder: PasswordEncoder
 
     override fun findBySocialId(socialId: String?): AccountBean? = accountRepository.findBySocialId(socialId)
-
+    override fun findByPhoneNumber(phoneNumber: String?): AccountBean? = accountRepository.findByPhoneNumber(phoneNumber)
     override fun findByEmail(email: String?): AccountBean? = accountRepository.findByEmail(email)
 
     override fun existsBySocialId(socialId: String?): Boolean = accountRepository.existsBySocialId(socialId)
@@ -79,43 +80,47 @@ class AuthServiceImpl : AuthService {
         devices.add(device)
 
         // create and save user
-        val user = userRepository.save(UserBean())
-
-        val account = accountRepository.save(AccountBean(
-                phoneNumber = phoneNumber,
+        val user = userRepository.insert(UserBean())
+        val account = AccountBean(
                 socialId = socialId,
                 email = email,
+                phoneNumber = phoneNumber,
                 password = encryptPassword(password),
                 staffId = staffId,
                 role = role,
                 info = user,
                 devices = devices
-        ))
+        )
+        val result = accountRepository.insert(account)
 
         return AccountDTO(
-                socialId = account.socialId,
-                email = account.email,
-                phoneNumber = account.phoneNumber,
-                active = account.active,
-                verified = account.emailVerified,
-                staffId = account.staffId,
-                role = account.role,
-                user = account.info,
-                devices = account.devices
+                id = result.id,
+                socialId = result.socialId,
+                email = result.email,
+                phoneNumber = result.phoneNumber,
+                active = result.active,
+                verified = result.emailVerified,
+                staffId = result.staffId,
+                role = result.role,
+                user = result.info,
+                devices = result.devices
         )
     }
 
-    override fun updateDevices(rawAccount: AccountBean, device: DeviceBean): AccountDTO? {
+    override fun updateDevices(account: AccountBean, device: DeviceBean): AccountDTO? {
         deviceRepository.save(device)
-        val account =  accountRepository.save(rawAccount)
+        val result =  accountRepository.save(account)
         return AccountDTO(
-                id = account._id,
-                socialId = account.socialId,
-                email = account.email,
-                active = account.active,
-                verified = account.emailVerified,
-                role = account.role,
-                devices = account.devices
+                id = result.id,
+                socialId = result.socialId,
+                email = result.email,
+                phoneNumber = result.phoneNumber,
+                active = result.active,
+                verified = result.emailVerified,
+                staffId = result.staffId,
+                role = result.role,
+                user = result.info,
+                devices = result.devices
         )
     }
 

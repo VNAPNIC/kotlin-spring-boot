@@ -10,9 +10,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "user")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UserBean(
-        @JsonProperty("_id")
         @Id
-        var _id: String? = null,
+        @JsonProperty("_id")
+        var id: String? = null,
         @JsonProperty("firstName")
         var firstName: String? = null,
         @JsonProperty("lastName")
