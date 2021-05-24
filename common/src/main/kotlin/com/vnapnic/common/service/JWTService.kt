@@ -1,9 +1,10 @@
 package com.vnapnic.common.service
 
-import com.vnapnic.common.property.ApplicationProperty
+import com.vnapnic.common.property.JwtProperty
 import io.jsonwebtoken.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import java.security.Key
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
@@ -27,7 +28,7 @@ open class JWTServiceImpl : JWTService {
 
     private val log = LoggerFactory.getLogger(JWTServiceImpl::class.java)
 
-    private val property = ApplicationProperty()
+    private val property = JwtProperty()
 
     @Autowired
     lateinit var redisService: RedisService
@@ -87,45 +88,27 @@ open class JWTServiceImpl : JWTService {
     }
 
     override fun parseJWT(token: String?): Map<String, String>? {
-        try {
-            //This line will throw an exception if it is not a signed JWS (as expected)
-            val jwsClaims = Jwts.parser()
-                    .setSigningKey(DatatypeConverter.parseBase64Binary(property.jwtPhase))
-                    .parseClaimsJws(token)
+        //This line will throw an exception if it is not a signed JWS (as expected)
+        val jwsClaims = Jwts.parser()
+                .setSigningKey(DatatypeConverter.parseBase64Binary(property.jwtPhase))
+                .parseClaimsJws(token)
 
-            if (jwsClaims.header.getAlgorithm() != SignatureAlgorithm.HS256.value)
-                throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
-            val claims = jwsClaims.body
+        if (jwsClaims.header.getAlgorithm() != SignatureAlgorithm.HS256.value)
+            throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
+        val claims = jwsClaims.body
 
-            // Find record from redis
-            val record: String? = redisService["$REDIS_JWT:${claims.id}"] as? String
-            if (record == null || !token.equals(record)) {
-                throw AuthenticationException("Token is expired.")
-            }
-
-            val maps = mutableMapOf<String, String>()
-            maps[ACCOUNT_ID] = redisService["$REDIS_JWT_ACCOUNT_ID:${claims.id}"] as? String
-                    ?: throw Exception("can't find account id")
-            maps[DEVICE_ID] = redisService["$REDIS_JWT_DEVICE_ID:${claims.id}"] as? String
-                    ?: throw Exception("can't find device id.")
-
-            return maps
-        } catch (e: SignatureException) {
-            log.info("Invalid JWT signature.");
-            log.trace("Invalid JWT signature trace: {}", e)
-        } catch (e: MalformedJwtException) {
-            log.info("Invalid JWT token.");
-            log.trace("Invalid JWT token trace: {}", e)
-        } catch (e: ExpiredJwtException) {
-            log.info("Expired JWT token.");
-            log.trace("Expired JWT token trace: {}", e)
-        } catch (e: UnsupportedJwtException) {
-            log.info("Unsupported JWT token.");
-            log.trace("Unsupported JWT token trace: {}", e)
-        } catch (e: IllegalArgumentException) {
-            log.info("JWT token compact of handler are invalid.");
-            log.trace("JWT token compact of handler are invalid trace: {}", e);
+        // Find record from redis
+        val record: String? = redisService["$REDIS_JWT:${claims.id}"] as? String
+        if (record == null || !token.equals(record)) {
+            throw AuthenticationException("Token is expired.")
         }
-        return null
+
+        val maps = mutableMapOf<String, String>()
+        maps[ACCOUNT_ID] = redisService["$REDIS_JWT_ACCOUNT_ID:${claims.id}"] as? String
+                ?: throw Exception("can't find account id")
+        maps[DEVICE_ID] = redisService["$REDIS_JWT_DEVICE_ID:${claims.id}"] as? String
+                ?: throw Exception("can't find device id.")
+
+        return maps
     }
 }
