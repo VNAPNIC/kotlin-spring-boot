@@ -1,0 +1,21 @@
+spring:
+  profiles:
+    active: db
+  messages:
+    encoding: UTF-8
+  # Database
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/Cleaner
+  # Redis
+  redis:
+    database: 2
+    host: 127.0.0.1
+    port: 6379
+    timeout: 60000
+logging:
+  level:
+    root:  ERROR
+    org.springframework:  ERROR
+    org.mybatis:  ERROR
+    org.linlinjava.litemall.db:  DEBUG
