@@ -2,7 +2,7 @@ package com.vnapnic.common.beans
 
 enum class ErrorCode(val code: Long, val message: String) {
 
-    SERVER_UNKNOWN_ERROR(1000,"Server unknown error."),
+    SERVER_UNKNOWN_ERROR(1000, "Server unknown error."),
 
     EMAIL_PASSWORD_NOT_CORRECT(1001, "Email/Password is not correct."),
     SOCIAL_PASSWORD_NOT_CORRECT(1002, "Social/Password is not correct."),
@@ -19,9 +19,15 @@ enum class ErrorCode(val code: Long, val message: String) {
 
     CODE_NOT_CORRECT(1009, "CODE is not correct."),
 
-    FILE_TOO_LARGE(1010,"File too large."),
+    FILE_TOO_LARGE(1010, "File too large."),
 
-    FILE_UPLOAD_FAIL(1011,"Upload file fail."),
+    FILE_UPLOAD_FAIL(1011, "Upload file fail."),
 
-    UNSUPPORTED_MEDIA_TYPE(1012,"Unsupported Media Type.")
+    UNSUPPORTED_MEDIA_TYPE(1012, "Unsupported Media Type."),
+
+    UNSUPPORTED_DEVICE(1013, "Unsupported device."),
+
+    PHONE_NUMBER_WRONG_FORMAT(1014, "Wrong phone number format."),
+
+    EMAIL_WRONG_FORMAT(1015, "Wrong email format.")
 }

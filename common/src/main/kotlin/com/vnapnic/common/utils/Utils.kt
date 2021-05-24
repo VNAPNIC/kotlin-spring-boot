@@ -1,9 +1,9 @@
 package com.vnapnic.common.utils
 
-inline fun <reified T : Enum<T>> valueOf(type: String): T? {
-    return try {
-        java.lang.Enum.valueOf(T::class.java, type)
-    } catch (e: Exception) {
-        null
-    }
+fun String.isPhoneNumber() : Boolean {
+    return "^[+]?[0-9]{9,13}\$".toRegex().matches(this)
+}
+
+fun String.isEmail() : Boolean {
+    return "^[A-Za-z](.*)([@])(.+)(\\.)(.+)".toRegex().matches(this)
 }

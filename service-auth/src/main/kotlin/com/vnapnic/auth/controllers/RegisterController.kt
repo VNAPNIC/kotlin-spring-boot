@@ -5,6 +5,8 @@ import com.vnapnic.common.exception.SequenceException
 import com.vnapnic.database.enums.Role
 import com.vnapnic.common.beans.ErrorCode
 import com.vnapnic.common.beans.Response
+import com.vnapnic.common.utils.isEmail
+import com.vnapnic.common.utils.isPhoneNumber
 import com.vnapnic.database.beans.AccountBean
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,6 +27,9 @@ class RegisterController {
     @Autowired
     lateinit var authService: AuthService
 
+    /**
+     * Staff can use account with the phone number or email
+     */
     @RequestMapping(value = ["/staff"], method = [RequestMethod.POST])
     fun registerStaffWithEmail(@RequestBody json: Map<String, String>): Response {
         try {
@@ -40,20 +45,28 @@ class RegisterController {
 
             log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
 
-            if (code != null || code != "") {
+            if (code.isNullOrEmpty()) {
                 if (code?.startsWith("S") == false)
                     return Response.failed(error = ErrorCode.CODE_NOT_CORRECT)
             }
 
-            if (email == null || email == "") {
+            if (email.isNullOrEmpty()) {
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
             }
 
-            if (phoneNumber == null || phoneNumber == "") {
+            if (!email.isEmail()){
+                return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
+            }
+
+            if (phoneNumber.isNullOrEmpty()) {
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
             }
 
-            if (password == null || password == "") {
+            if (!phoneNumber.isPhoneNumber()){
+                return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+            }
+
+            if (password.isNullOrEmpty()) {
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
             }
 
@@ -104,6 +117,9 @@ class RegisterController {
         }
     }
 
+    /**
+     * Customer only account is phone number
+     */
     @RequestMapping(value = ["/customer"], method = [RequestMethod.POST])
     fun registerCustomer(@RequestBody json: Map<String, String>): Response {
         try {
@@ -118,11 +134,15 @@ class RegisterController {
 
             log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
 
-            if (phoneNumber == null || phoneNumber == "") {
+            if (phoneNumber.isNullOrEmpty()) {
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
             }
 
-            if (password == null || password == "") {
+            if (!phoneNumber.isPhoneNumber()){
+                return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+            }
+
+            if (password.isNullOrEmpty()) {
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
             }
 

@@ -5,6 +5,8 @@ import com.vnapnic.database.enums.Platform
 import com.vnapnic.common.beans.ErrorCode
 import com.vnapnic.common.beans.Response
 import com.vnapnic.common.service.JWTService
+import com.vnapnic.common.utils.isEmail
+import com.vnapnic.common.utils.isPhoneNumber
 import com.vnapnic.database.beans.DeviceBean
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,12 +36,20 @@ class AuthController {
             val deviceId: String? = json["deviceId"]
             val platform: String? = json["platform"]
 
-            if (email == null || email == "") {
+            if (email.isNullOrEmpty()) {
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
+            }
+
+            if (!email.isEmail()){
+                return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
             }
 
             if (password == null || password == "") {
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
+            }
+
+            if (deviceId == null || deviceName == null || platform == null) {
+                return Response.failed(error = ErrorCode.UNSUPPORTED_DEVICE)
             }
 
             log.info(String.format("request with %s %s", email, password))
@@ -70,6 +80,33 @@ class AuthController {
             e.printStackTrace()
             return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
         }
+    }
+
+    @RequestMapping(value = ["/phone"], method = [RequestMethod.POST])
+    fun authWithPhoneNumber(@RequestBody json: Map<String, String>): Response {
+        val phoneNumber: String? = json["phoneNumber"]
+        val password: String? = json["password"]
+        // Device
+        val deviceName: String? = json["deviceName"]
+        val deviceId: String? = json["deviceId"]
+        val platform: String? = json["platform"]
+
+        if (phoneNumber.isNullOrEmpty()) {
+            return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
+        }
+
+        if (!phoneNumber.isPhoneNumber()){
+            return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+        }
+
+        if (password == null || password == "") {
+            return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
+        }
+
+        if (deviceId == null || deviceName == null || platform == null) {
+            return Response.failed(error = ErrorCode.UNSUPPORTED_DEVICE)
+        }
+        return Response.unauthorized()
     }
 
     @RequestMapping(value = ["/facebook"], method = [RequestMethod.POST])
