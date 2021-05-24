@@ -43,7 +43,15 @@ class Response(val code: Long, val message: String?, val errorCode: Long? = null
          * Not login to return results
          */
         fun unauthorized(data: Any? = null): Response {
-            return Response(code = ResultCode.UNAUTHORIZED.code, message = ResultCode.UNAUTHORIZED.message, data = null)
+            return Response(code = ResultCode.UNAUTHORIZED.code, message = ResultCode.UNAUTHORIZED.message, data = data)
+        }
+
+        /**
+         * Not login to return results
+         */
+        fun unauthorized(data: Any? = null, message: String? = null): Response {
+            return Response(code = ResultCode.UNAUTHORIZED.code, message = message
+                    ?: ResultCode.UNAUTHORIZED.message, data = data)
         }
 
         /**

@@ -51,16 +51,6 @@ class UploadController {
         } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
             Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
-        } catch (e: SignatureException) {
-            Response.unauthorized()
-        } catch (e: MalformedJwtException) {
-            Response.unauthorized()
-        } catch (e: ExpiredJwtException) {
-            Response.unauthorized()
-        } catch (e: UnsupportedJwtException) {
-            Response.unauthorized()
-        } catch (e: IllegalArgumentException) {
-            Response.unauthorized()
         } catch (e: Exception) {
             e.printStackTrace()
             Response.failed(ResultCode.EXPECTATION_FAILED, ErrorCode.FILE_UPLOAD_FAIL)
@@ -77,20 +67,15 @@ class UploadController {
             val accountId = claims?.get(ACCOUNT_ID)
             val deviceId = claims?.get(DEVICE_ID)
             val fileInfo = storageService.saveFiles(accountId, deviceId, file)
-            Response.success(data = fileInfo)
+            Response.success(data = FileDTO(
+                    fileId = fileInfo.id,
+                    fileName = fileInfo.fileName,
+                    fileExtName = fileInfo.fileExtName,
+                    contentType = fileInfo.contentType
+            ))
         } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
             Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
-        } catch (e: SignatureException) {
-            Response.unauthorized()
-        } catch (e: MalformedJwtException) {
-            Response.unauthorized()
-        } catch (e: ExpiredJwtException) {
-            Response.unauthorized()
-        } catch (e: UnsupportedJwtException) {
-            Response.unauthorized()
-        } catch (e: IllegalArgumentException) {
-            Response.unauthorized()
         } catch (e: Exception) {
             e.printStackTrace()
             Response.failed(ResultCode.EXPECTATION_FAILED, ErrorCode.FILE_UPLOAD_FAIL)
