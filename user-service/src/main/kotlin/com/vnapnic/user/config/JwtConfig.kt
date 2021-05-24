@@ -6,4 +6,4 @@ import org.springframework.context.annotation.Configuration
 
 @EnableCaching
 @Configuration
-class JwtConfig : BaseJWTConfig()
+class JWTConfig : BaseJWTConfig()
