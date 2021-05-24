@@ -5,6 +5,7 @@ import com.vnapnic.database.beans.files.AvatarInfoBean
 import com.vnapnic.database.beans.files.FileInfoBean
 import com.vnapnic.database.exception.UnsupportedMediaType
 import com.vnapnic.database.storage.*
+import com.vnapnic.storage.dto.FileDTO
 import com.vnapnic.storage.repositories.AccountRepository
 import com.vnapnic.storage.repositories.AvatarRepository
 import com.vnapnic.storage.repositories.FilesRepository
@@ -28,16 +29,16 @@ interface FilesStorageService {
     fun saveAvatarToUser(avatarInfo: AvatarInfoBean)
 
     @Throws(Exception::class)
-    fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): AvatarInfoBean
+    fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
 
     @Throws(Exception::class)
-    fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfoBean
+    fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
 
     @Throws(Exception::class)
-    fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfoBean
+    fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
 
     @Throws(Exception::class)
-    fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfoBean
+    fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
 }
 
 @Service
@@ -91,7 +92,7 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): AvatarInfoBean {
+    override fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
         val file = localStorage.storeImage(avatarPath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
         val avatarInfo = AvatarInfoBean()
         avatarInfo.recorder = accountId
@@ -101,11 +102,18 @@ class FilesStorageServiceImpl : FilesStorageService {
         avatarInfo.fileName = file.name
         avatarInfo.fileExtName = ImageUtils.getFileExtension(file)
         avatarInfo.contentType = Files.probeContentType(file.toPath())
-        return avatarRepository.save(avatarInfo)
+        val result = avatarRepository.save(avatarInfo)
+        saveAvatarToUser(result)
+        return FileDTO(
+                fileId = result.id,
+                fileName = result.fileName,
+                fileExtName = result.fileExtName,
+                contentType = result.contentType
+        )
     }
 
     @Throws(Exception::class)
-    override fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfoBean {
+    override fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
         if (multipartFile.originalFilename == null)
             throw UnsupportedMediaType("Upload file fail.")
 
@@ -122,7 +130,7 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfoBean {
+    override fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
         val file = localStorage.storeImage(imagePath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
         val fileInfo = FileInfoBean()
         fileInfo.recorder = accountId
@@ -132,11 +140,18 @@ class FilesStorageServiceImpl : FilesStorageService {
         fileInfo.fileName = file.name
         fileInfo.fileExtName = ImageUtils.getFileExtension(file)
         fileInfo.contentType = Files.probeContentType(file.toPath())
-        return filesRepository.save(fileInfo)
+
+        val result = filesRepository.save(fileInfo)
+        return FileDTO(
+                fileId = result.id,
+                fileName = result.fileName,
+                fileExtName = result.fileExtName,
+                contentType = result.contentType
+        )
     }
 
     @Throws(Exception::class)
-    override fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileInfoBean {
+    override fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
         val file = localStorage.storeVideo(videoPath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
         val fileInfo = FileInfoBean()
         fileInfo.recorder = accountId
@@ -146,6 +161,13 @@ class FilesStorageServiceImpl : FilesStorageService {
         fileInfo.fileName = file.name
         fileInfo.fileExtName = ImageUtils.getFileExtension(file)
         fileInfo.contentType = Files.probeContentType(file.toPath())
-        return filesRepository.save(fileInfo)
+
+        val result = filesRepository.save(fileInfo)
+        return FileDTO(
+                fileId = result.id,
+                fileName = result.fileName,
+                fileExtName = result.fileExtName,
+                contentType = result.contentType
+        )
     }
 }

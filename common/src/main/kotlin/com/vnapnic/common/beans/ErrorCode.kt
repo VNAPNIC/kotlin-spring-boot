@@ -6,28 +6,28 @@ enum class ErrorCode(val code: Long, val message: String) {
 
     EMAIL_PASSWORD_NOT_CORRECT(1001, "Email/Password is not correct."),
     SOCIAL_PASSWORD_NOT_CORRECT(1002, "Social/Password is not correct."),
+    PHONE_NUMBER_PASSWORD_NOT_CORRECT(1003, "Phone number/Password is not correct."),
 
-    PASSWORD_IS_NULL_BLANK(1003, "Password is null or blank."),
+    PASSWORD_IS_NULL_BLANK(1004, "Password is null or blank."),
+    EMAIL_IS_NULL_BLANK(1005, "Email is null or blank."),
 
-    EMAIL_IS_NULL_BLANK(1004, "Email is null or blank."),
-    EMAIL_IS_EXISTS(1005, "Email is exists."),
+    EMAIL_IS_EXISTS(1006, "Email is exists."),
+    SOCIAL_IS_EXISTS(1007, "Social is exists."),
 
-    SOCIAL_IS_EXISTS(1006, "Social is exists."),
+    PHONE_NUMBER_IS_NULL_BLANK(1008, "Phone number is null or blank."),
+    PHONE_NUMBER_IS_EXISTS(1009, "Phone number is exists."),
 
-    PHONE_NUMBER_IS_NULL_BLANK(1007, "Phone number is null or blank."),
-    PHONE_NUMBER_IS_EXISTS(1008, "Phone number is exists."),
+    CODE_NOT_CORRECT(1010, "CODE is not correct."),
 
-    CODE_NOT_CORRECT(1009, "CODE is not correct."),
+    FILE_TOO_LARGE(1011, "File too large."),
 
-    FILE_TOO_LARGE(1010, "File too large."),
+    FILE_UPLOAD_FAIL(1012, "Upload file fail."),
 
-    FILE_UPLOAD_FAIL(1011, "Upload file fail."),
+    UNSUPPORTED_MEDIA_TYPE(1013, "Unsupported Media Type."),
 
-    UNSUPPORTED_MEDIA_TYPE(1012, "Unsupported Media Type."),
+    UNSUPPORTED_DEVICE(1014, "Unsupported device."),
 
-    UNSUPPORTED_DEVICE(1013, "Unsupported device."),
+    PHONE_NUMBER_WRONG_FORMAT(1015, "Wrong phone number format."),
 
-    PHONE_NUMBER_WRONG_FORMAT(1014, "Wrong phone number format."),
-
-    EMAIL_WRONG_FORMAT(1015, "Wrong email format.")
+    EMAIL_WRONG_FORMAT(1016, "Wrong email format.")
 }

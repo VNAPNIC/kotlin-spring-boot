@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service
 
 interface AuthService {
     fun findBySocialId(socialId: String?): AccountBean?
+    fun findByPhoneNumber(phoneNumber: String?): AccountBean?
     fun findByEmail(email: String?): AccountBean?
 
     fun existsBySocialId(socialId: String?): Boolean
@@ -53,7 +54,7 @@ class AuthServiceImpl : AuthService {
     lateinit var passwordEncoder: PasswordEncoder
 
     override fun findBySocialId(socialId: String?): AccountBean? = accountRepository.findBySocialId(socialId)
-
+    override fun findByPhoneNumber(phoneNumber: String?): AccountBean? = accountRepository.findByPhoneNumber(phoneNumber)
     override fun findByEmail(email: String?): AccountBean? = accountRepository.findByEmail(email)
 
     override fun existsBySocialId(socialId: String?): Boolean = accountRepository.existsBySocialId(socialId)

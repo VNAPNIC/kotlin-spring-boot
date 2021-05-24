@@ -81,7 +81,7 @@ class RegisterController {
             // create staff Id
             val staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
 
-            val accountDTO = authService.save(staffId = staffId,
+            val dto = authService.save(staffId = staffId,
                     phoneNumber = phoneNumber,
                     socialId = socialId,
                     email = email,
@@ -91,7 +91,7 @@ class RegisterController {
                     deviceName = deviceName,
                     platform = platform)
 
-            return Response.success(data = accountDTO)
+            return Response.success(data = dto)
         } catch (e: Exception) {
             e.printStackTrace()
             return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
@@ -150,7 +150,7 @@ class RegisterController {
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
             }
 
-            val accountDTO = authService.save(
+            val dto = authService.save(
                     staffId = null,
                     phoneNumber = phoneNumber,
                     socialId = socialId,
@@ -161,7 +161,7 @@ class RegisterController {
                     deviceName = deviceName,
                     platform = platform)
 
-            return Response.success(data = accountDTO)
+            return Response.success(data = dto)
         } catch (e: Exception) {
             e.printStackTrace()
             return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
