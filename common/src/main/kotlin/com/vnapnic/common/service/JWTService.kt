@@ -1,9 +1,10 @@
 package com.vnapnic.common.service
 
-import com.vnapnic.common.property.ApplicationProperty
+import com.vnapnic.common.property.JwtProperty
 import io.jsonwebtoken.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import java.security.Key
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
@@ -27,7 +28,7 @@ open class JWTServiceImpl : JWTService {
 
     private val log = LoggerFactory.getLogger(JWTServiceImpl::class.java)
 
-    private val property = ApplicationProperty()
+    private val property = JwtProperty()
 
     @Autowired
     lateinit var redisService: RedisService
