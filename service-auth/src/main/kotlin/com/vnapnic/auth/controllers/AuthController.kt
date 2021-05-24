@@ -72,9 +72,9 @@ class AuthController {
                 rawAccount.devices?.add(device)
             }
 
-            val jwt = jwtService.generateJWT(rawAccount._id, deviceId)
-            val dto = authService.updateDevices(rawAccount, device)
+            val jwt = jwtService.generateJWT(rawAccount.id, deviceId)
 
+            val dto = authService.updateDevices(rawAccount, device)
             return Response.success(data = dto, token = jwt)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -130,9 +130,9 @@ class AuthController {
                 rawAccount.devices?.add(device)
             }
 
-            val jwt = jwtService.generateJWT(rawAccount._id, deviceId)
-            val dto = authService.updateDevices(rawAccount, device)
+            val jwt = jwtService.generateJWT(rawAccount.id, deviceId)
 
+            val dto = authService.updateDevices(rawAccount, device)
             return Response.success(data = dto, token = jwt)
         } catch (e: Exception) {
             e.printStackTrace()

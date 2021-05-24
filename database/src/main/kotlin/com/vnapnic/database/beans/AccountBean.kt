@@ -11,9 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "account")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class AccountBean(
-        @JsonProperty("_id")
         @Id
-        var _id: String = "",
+        @JsonProperty("_id")
+        var id: String? = null,
         @JsonProperty("phoneNumber")
         var phoneNumber: String? = null,
         @JsonProperty("socialId")
@@ -45,20 +45,5 @@ data class AccountBean(
     companion object {
         @Transient
         const val SEQUENCE_NAME = "staff_id_sequence"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AccountBean
-
-        if (_id != other._id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return _id.hashCode()
     }
 }

@@ -86,7 +86,7 @@ class FilesStorageServiceImpl : FilesStorageService {
         val account = avatarInfo.recorder?.let { accountId -> accountRepository.findById(accountId) }
                 ?: throw Exception("can't save avatar to user")
         val user = account.get().info
-        val query = Query(Criteria.where("_id").`is`(user?._id))
+        val query = Query(Criteria.where("_id").`is`(user?.id))
         val update = Update().set("avatar", avatarInfo)
         mongoOperations.updateFirst(query, update, UserBean::class.java)
     }
