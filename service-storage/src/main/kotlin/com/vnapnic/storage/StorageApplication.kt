@@ -16,14 +16,6 @@ class StorageApplication : CommandLineRunner {
     override fun run(vararg args: String?) {
         storageService.init()
     }
-
-//    @Bean
-//    fun multipartConfigElement(): MultipartConfigElement? {
-//        val factory = MultipartConfigFactory()
-//        factory.setMaxFileSize(DataSize.ofMegabytes(10L))
-//        factory.setMaxRequestSize(DataSize.ofMegabytes(10L))
-//        return factory.createMultipartConfig()
-//    }
 }
 
 fun main(args: Array<String>) {

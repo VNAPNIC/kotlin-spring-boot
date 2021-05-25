@@ -83,19 +83,19 @@ class FilesStorageServiceImpl : FilesStorageService {
 
     @Throws(Exception::class)
     override fun saveAvatarToUser(avatarInfo: AvatarInfoBean) {
-        val account = avatarInfo.recorder?.let { accountId -> accountRepository.findById(accountId) }
-                ?: throw Exception("can't save avatar to user")
-        val user = account.get().info
-        val query = Query(Criteria.where("_id").`is`(user?.id))
+        val query = Query(Criteria.where("_id").`is`(avatarInfo.recorder))
         val update = Update().set("avatar", avatarInfo)
         mongoOperations.updateFirst(query, update, UserBean::class.java)
     }
 
     @Throws(Exception::class)
     override fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
+        val account = accountId?.let { accountRepository.findById(it) } ?: throw Exception("can't save avatar to user")
+
         val file = localStorage.storeImage(avatarPath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
+
         val avatarInfo = AvatarInfoBean()
-        avatarInfo.recorder = accountId
+        avatarInfo.recorder = account.get().info?.id
         avatarInfo.deviceId = deviceId
         avatarInfo.recordDate = Date(file.name.split(".")[0].toLong())
         avatarInfo.path = "$AVATAR_URL\\${file.name}"

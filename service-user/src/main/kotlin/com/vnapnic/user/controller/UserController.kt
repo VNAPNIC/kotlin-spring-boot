@@ -2,10 +2,15 @@ package com.vnapnic.user.controller
 
 import com.vnapnic.common.beans.ErrorCode
 import com.vnapnic.common.beans.Response
+import com.vnapnic.common.service.ACCOUNT_ID
+import com.vnapnic.common.service.DEVICE_ID
+import com.vnapnic.common.service.JWTService
+import com.vnapnic.common.utils.JWTUtils
 import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
 import com.vnapnic.user.services.UserService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -14,10 +19,22 @@ class UserController {
     @Autowired
     lateinit var userService: UserService
 
+    @Autowired
+    lateinit var jwtService: JWTService
+
     @RequestMapping(value = ["/update"], method = [RequestMethod.PUT])
-    fun updateProfile(@RequestBody json: Map<String, String>): Response {
+    fun updateProfile(
+            @RequestHeader headers: MultiValueMap<String, String>,
+            @RequestBody json: Map<String, String>): Response {
         try {
-            val userId: String? = json["userId"]
+            val acceptToken = JWTUtils.tokenFromBearerToken(headers["authorization"]?.get(0))
+            val claims = jwtService.parseJWT(acceptToken)
+            val accountId = claims?.get(ACCOUNT_ID)
+            val deviceId = claims?.get(DEVICE_ID)
+            if (accountId.isNullOrEmpty() || deviceId.isNullOrEmpty())
+                return Response.failed(error = ErrorCode.USER_NOT_FOUND)
+
+            val userId = userService.getUserIdByAccountId(accountId)
             val firstName: String? = json["firstName"]
             val lastName: String? = json["lastName"]
             val weight: Double? = json["weight"]?.toDouble()

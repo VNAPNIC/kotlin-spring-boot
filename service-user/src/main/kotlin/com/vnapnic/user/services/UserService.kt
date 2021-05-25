@@ -4,6 +4,7 @@ import com.vnapnic.database.beans.UserBean
 import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
 import com.vnapnic.user.dto.UserDTO
+import com.vnapnic.user.repositories.AccountRepository
 import com.vnapnic.user.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.crossstore.ChangeSetPersister
@@ -12,6 +13,9 @@ import org.springframework.web.client.HttpClientErrorException
 import kotlin.jvm.Throws
 
 interface UserService {
+
+    @Throws(Exception::class)
+    fun getUserIdByAccountId(accountId: String): String?
 
     @Throws(Exception::class)
     fun findById(userId: String?): UserDTO
@@ -25,6 +29,15 @@ class UserServiceImpl : UserService {
 
     @Autowired
     lateinit var userRepository: UserRepository
+
+    @Autowired
+    lateinit var accountRepository: AccountRepository
+
+    @Throws(Exception::class)
+    override fun getUserIdByAccountId(accountId: String): String? {
+        val account = accountRepository.findById(accountId).get()
+        return account.info?.id
+    }
 
     @Throws(Exception::class)
     override fun findById(userId: String?): UserDTO {

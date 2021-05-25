@@ -3,11 +3,12 @@ server:
 spring:
   application:
     name: gateway
+  messages:
+    encoding: UTF-8
   servlet:
     multipart:
-      enabled: true
-      max-file-size: 50MB
-      max-request-size: 50MB
+      max-file-size: 10MB
+      max-request-size: 10MB
   redis:
     database: 2
     host: 127.0.0.1
@@ -20,31 +21,14 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: hystrix.stream
-
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 60000
-            # Disable Hystrix timeout globally (for all services)
-        timeout:
-          enabled: false
-
 ribbon:
-  ConnectTimeout: 60000
-  ReadTimeout: 60000
+  ConnectTimeout: 10000
+  ReadTimeout: 5000
 
 zuul:
   host:
-    connect-timeout-millis: 60000
-    socket-timeout-millis: 60000
+    connect-timeout-millis: 30000
+    socket-timeout-millis: 30000
   # Disable accessing services using service name (i.e. gallery-service).
   # They should be only accessed through the path defined below.
   ignoredServices: '*'
@@ -70,3 +54,35 @@ zuul:
             name: user-service
             fallbackuri: forward:/userFallBack
   sensitive-headers: Cookie,Set-Cookie
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: hystrix.stream
+#feign:
+#  histrix:
+#    enabled: false
+#
+#hystrix:
+#  command:
+#    choose:
+#      default:
+#        execution:
+#          timeout:
+#            enabled: false
+            # Disable Hystrix timeout globally (for all services)
+#    storage-service:
+#      execution:
+#        isolation:
+#          thread:
+#            timeoutInMilliseconds: 960000
+#  MaxAutoRetries: 1 # Number of retries for the current instance
+#  MaxAutoRetriesNextServer: 1 # Number of retries for switching instances
+
+#storage-service:
+#  ribbon:
+#    ConnectTimeout: 960000
+#    ReadTimeout: 960000
+#    MaxAutoRetries: 1 # Number of retries for the current instance
+#    MaxAutoRetriesNextServer: 1 # Number of retries for switching instances
