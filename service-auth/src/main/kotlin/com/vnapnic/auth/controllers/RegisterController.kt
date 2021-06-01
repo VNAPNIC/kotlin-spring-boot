@@ -30,8 +30,8 @@ class RegisterController {
     /**
      * Staff can use account with the phone number or email
      */
-    @RequestMapping(value = ["/staff"], method = [RequestMethod.POST])
-    fun registerStaffWithEmail(@RequestBody json: Map<String, String>): Response {
+    @RequestMapping(value = ["collaborator"], method = [RequestMethod.POST])
+    fun collaboratorRegister(@RequestBody json: Map<String, String>): Response {
         try {
             val code: String? = json["code"]
             val phoneNumber: String? = json["phoneNumber"]
@@ -45,43 +45,35 @@ class RegisterController {
 
             log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
 
-            if (code.isNullOrEmpty()) {
+            if (code.isNullOrEmpty())
                 if (code?.startsWith("S") == false)
                     return Response.failed(error = ErrorCode.CODE_NOT_CORRECT)
-            }
 
-            if (email.isNullOrEmpty()) {
+            if (email.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
-            }
 
-            if (!email.isEmail()){
+            if (!email.isEmail())
                 return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
-            }
 
-            if (phoneNumber.isNullOrEmpty()) {
+            if (phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
-            }
 
-            if (!phoneNumber.isPhoneNumber()){
+            if (!phoneNumber.isPhoneNumber())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
-            }
 
-            if (password.isNullOrEmpty()) {
+            if (password.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
-            }
 
-            if (authService.existsByEmail(email)) {
+            if (authService.existsByEmail(email))
                 return Response.failed(error = ErrorCode.EMAIL_IS_EXISTS)
-            }
 
-            if (authService.existsByPhoneNumber(phoneNumber)) {
+            if (authService.existsByPhoneNumber(phoneNumber))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
-            }
 
             // create staff Id
             val staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
 
-            val dto = authService.save(staffId = staffId,
+            val dto = authService.saveAccount(staffId = staffId,
                     phoneNumber = phoneNumber,
                     socialId = socialId,
                     email = email,
@@ -121,7 +113,7 @@ class RegisterController {
      * Customer only account is phone number
      */
     @RequestMapping(value = ["/customer"], method = [RequestMethod.POST])
-    fun registerCustomer(@RequestBody json: Map<String, String>): Response {
+    fun customerRegister(@RequestBody json: Map<String, String>): Response {
         try {
             val phoneNumber: String? = json["phoneNumber"]
             val socialId: String? = json["socialId"]
@@ -134,23 +126,19 @@ class RegisterController {
 
             log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
 
-            if (phoneNumber.isNullOrEmpty()) {
+            if (phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
-            }
 
-            if (!phoneNumber.isPhoneNumber()){
+            if (!phoneNumber.isPhoneNumber())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
-            }
 
-            if (password.isNullOrEmpty()) {
+            if (password.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
-            }
 
-            if (authService.existsByPhoneNumber(phoneNumber)) {
+            if (authService.existsByPhoneNumber(phoneNumber))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
-            }
 
-            val dto = authService.save(
+            val dto = authService.saveAccount(
                     staffId = null,
                     phoneNumber = phoneNumber,
                     socialId = socialId,

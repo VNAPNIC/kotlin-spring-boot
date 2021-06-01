@@ -21,14 +21,10 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
-ribbon:
-  ConnectTimeout: 10000
-  ReadTimeout: 5000
-
 zuul:
   host:
-    connect-timeout-millis: 30000
-    socket-timeout-millis: 30000
+    connect-timeout-millis: 10000
+    socket-timeout-millis: 60000
   # Disable accessing services using service name (i.e. gallery-service).
   # They should be only accessed through the path defined below.
   ignoredServices: '*'
@@ -55,34 +51,55 @@ zuul:
             fallbackuri: forward:/userFallBack
   sensitive-headers: Cookie,Set-Cookie
 
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: hystrix.stream
-#feign:
-#  histrix:
-#    enabled: false
-#
-#hystrix:
-#  command:
-#    choose:
-#      default:
-#        execution:
-#          timeout:
-#            enabled: false
-            # Disable Hystrix timeout globally (for all services)
-#    storage-service:
-#      execution:
-#        isolation:
-#          thread:
-#            timeoutInMilliseconds: 960000
-#  MaxAutoRetries: 1 # Number of retries for the current instance
-#  MaxAutoRetriesNextServer: 1 # Number of retries for switching instances
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+feign:
+  histrix:
+    enabled: false
 
-#storage-service:
-#  ribbon:
-#    ConnectTimeout: 960000
-#    ReadTimeout: 960000
-#    MaxAutoRetries: 1 # Number of retries for the current instance
-#    MaxAutoRetriesNextServer: 1 # Number of retries for switching instances
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+  eager-load:
+      enabled: true
+
+auth-service:
+  ribbon:
+    ReadTimeout: 60000
+    ConnectTimeout: 60000
+    eager-load:
+      enabled: true
+user-service:
+  ribbon:
+    ReadTimeout: 60000
+    ConnectTimeout: 60000
+    eager-load:
+      enabled: true
+
+hystrix:
+  command:
+    choose:
+      default:
+        execution:
+          timeout:
+            enabled: false
+          isolation:
+            thread:
+              timeoutInMilliseconds: 60000
+      auth-service:
+        execution:
+          timeout:
+            enabled: false
+          isolation:
+            thread:
+              timeoutInMilliseconds: 60000
+      user-service:
+        execution:
+          timeout:
+            enabled: false
+          isolation:
+            thread:
+              timeoutInMilliseconds: 60000

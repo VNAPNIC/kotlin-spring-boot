@@ -36,45 +36,45 @@ class AuthController {
             val deviceId: String? = json["deviceId"]
             val platform: String? = json["platform"]
 
-            if (email.isNullOrEmpty()) {
+            if (email.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
-            }
 
-            if (!email.isEmail()) {
+            if (!email.isEmail())
                 return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
-            }
 
-            if (password == null || password == "") {
+            if (password == null || password == "")
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
-            }
 
-            if (deviceId == null || deviceName == null || platform == null) {
+            if (deviceId == null || deviceName == null || platform == null)
                 return Response.failed(error = ErrorCode.UNSUPPORTED_DEVICE)
-            }
 
             log.info(String.format("request with %s %s", email, password))
             // Find account with same username, check password
             if (!authService.existsByEmail(email))
                 return Response.failed(error = ErrorCode.EMAIL_PASSWORD_NOT_CORRECT)
 
+            // get account by email
             val rawAccount = authService.findByEmail(email)
                     ?: return Response.failed(error = ErrorCode.EMAIL_PASSWORD_NOT_CORRECT)
+
             // Validate password
             if (!authService.validatePassword(password, rawAccount.password))
                 return Response.failed(error = ErrorCode.EMAIL_PASSWORD_NOT_CORRECT)
-            val device = DeviceBean(
+
+            // Save device
+            val device = authService.saveDevice(DeviceBean(
                     deviceId = deviceId,
                     deviceName = deviceName,
                     platform = Platform.valueOf(platform)
-            )
+            ))
+
             // Update device after login
-            if (rawAccount.devices?.any { element -> element?.deviceId == deviceId } == false) {
+            if (rawAccount.devices?.any { element -> element?.deviceId == deviceId } == false)
                 rawAccount.devices?.add(device)
-            }
 
             val jwt = jwtService.generateJWT(rawAccount.id, deviceId)
 
-            val dto = authService.updateDevices(rawAccount, device)
+            val dto = authService.login(rawAccount)
             return Response.success(data = dto, token = jwt)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -92,21 +92,17 @@ class AuthController {
             val deviceId: String? = json["deviceId"]
             val platform: String? = json["platform"]
 
-            if (phoneNumber.isNullOrEmpty()) {
+            if (phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
-            }
 
-            if (!phoneNumber.isPhoneNumber()) {
+            if (!phoneNumber.isPhoneNumber())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
-            }
 
-            if (password == null || password == "") {
+            if (password == null || password == "")
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
-            }
 
-            if (deviceId.isNullOrEmpty() || deviceName.isNullOrEmpty() || platform.isNullOrEmpty()) {
+            if (deviceId.isNullOrEmpty() || deviceName.isNullOrEmpty() || platform.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.UNSUPPORTED_DEVICE)
-            }
 
             log.info(String.format("request with %s %s", phoneNumber, password))
 
@@ -114,25 +110,28 @@ class AuthController {
             if (!authService.existsByPhoneNumber(phoneNumber))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
 
+            // get account by phone number
             val rawAccount = authService.findByPhoneNumber(phoneNumber)
                     ?: return Response.failed(error = ErrorCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
+
             // Validate password
             if (!authService.validatePassword(password, rawAccount.password))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
 
-            val device = DeviceBean(
+            // Save device
+            val device = authService.saveDevice(DeviceBean(
                     deviceId = deviceId,
                     deviceName = deviceName,
                     platform = Platform.valueOf(platform)
-            )
+            ))
+
             // Update device after login
-            if (rawAccount.devices?.any { element -> element?.deviceId == deviceId } == false) {
+            if (rawAccount.devices?.any { element -> element?.deviceId == deviceId } == false)
                 rawAccount.devices?.add(device)
-            }
 
             val jwt = jwtService.generateJWT(rawAccount.id, deviceId)
 
-            val dto = authService.updateDevices(rawAccount, device)
+            val dto = authService.login(rawAccount)
             return Response.success(data = dto, token = jwt)
         } catch (e: Exception) {
             e.printStackTrace()

@@ -1,8 +1,8 @@
 package com.vnapnic.common.dto
 
 import com.vnapnic.database.enums.Role
-import com.vnapnic.database.beans.DeviceBean
 import com.vnapnic.database.beans.UserBean
+import java.util.*
 
 
 open class AccountDTO(var id: String? = null,
@@ -10,9 +10,12 @@ open class AccountDTO(var id: String? = null,
                       val phoneNumber: String? = null,
                       val email: String? = null,
                       val active: Boolean?,
-                      val verified: Boolean?,
-                      val staffId: String? = null,
+                      val emailVerified: Boolean?,
+                      val phoneVerified: Boolean?,
+                      val registerTime: Date? = null,
+                      val emailVerifiedTime: Date? = null,
+                      val phoneVerifiedTime: Date? = null,
+                      val collaboratorId: String? = null,
                       val role: Role? = Role.UNKNOWN,
-                      val user: UserBean? = null,
-                      val devices: ArrayList<DeviceBean?>? = null
+                      val user: UserBean? = null
 )

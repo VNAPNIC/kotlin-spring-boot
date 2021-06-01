@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
+import java.util.*
+import kotlin.collections.ArrayList
 
 @Document(collection = "account")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -28,12 +30,18 @@ data class AccountBean(
         var cccdBack: String? = null,
         @JsonProperty("active")
         var active: Boolean = false,
-        @JsonProperty("blocked")
-        var blocked: Boolean = false,
         @JsonProperty("emailVerified") // Email verification passed
         var emailVerified: Boolean = false,
-        @JsonProperty("staffId")
-        var staffId: String? = null,
+        @JsonProperty("emailVerified") // Email verification passed
+        var phoneVerified: Boolean = false,
+        @JsonProperty("registerTime")
+        var registerTime: Date? = null,
+        @JsonProperty("emailVerifiedTime")
+        var emailVerifiedTime: Date? = null,
+        @JsonProperty("phoneVerifiedTime")
+        var phoneVerifiedTime: Date? = null,
+        @JsonProperty("collaboratorId")
+        var collaboratorId: String? = null,
         @JsonProperty("devices")
         var devices: ArrayList<DeviceBean?>? = null,
         @JsonProperty("role")

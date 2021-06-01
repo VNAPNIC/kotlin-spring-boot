@@ -2,18 +2,23 @@ package com.vnapnic.auth.services
 
 import com.vnapnic.auth.repositories.AccountRepository
 import com.vnapnic.auth.repositories.DeviceRepository
+import com.vnapnic.auth.repositories.LoginHistoryRepository
 import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.common.dto.AccountDTO
 import com.vnapnic.database.beans.AccountBean
 import com.vnapnic.database.beans.DeviceBean
+import com.vnapnic.database.beans.LoginHistoryBean
 import com.vnapnic.database.beans.UserBean
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.database.enums.Role
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.util.*
 
 interface AuthService {
+
     fun findBySocialId(socialId: String?): AccountBean?
     fun findByPhoneNumber(phoneNumber: String?): AccountBean?
     fun findByEmail(email: String?): AccountBean?
@@ -22,17 +27,19 @@ interface AuthService {
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean
 
-    fun save(staffId: String?,
-             phoneNumber: String?,
-             socialId: String?,
-             email: String?,
-             password: String?,
-             role: Role?,
-             deviceId: String?,
-             deviceName: String?,
-             platform: String?): AccountDTO?
+    fun saveAccount(staffId: String?,
+                    phoneNumber: String?,
+                    socialId: String?,
+                    email: String?,
+                    password: String?,
+                    role: Role?,
+                    deviceId: String?,
+                    deviceName: String?,
+                    platform: String?): AccountDTO?
 
-    fun updateDevices(account: AccountBean, device: DeviceBean) : AccountDTO?
+    fun saveDevice(device: DeviceBean): DeviceBean?
+
+    fun login(account: AccountBean): AccountDTO?
 
     fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
@@ -51,6 +58,9 @@ class AuthServiceImpl : AuthService {
     lateinit var deviceRepository: DeviceRepository
 
     @Autowired
+    lateinit var loginHistoryRepository: LoginHistoryRepository
+
+    @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
     override fun findBySocialId(socialId: String?): AccountBean? = accountRepository.findBySocialId(socialId)
@@ -61,66 +71,93 @@ class AuthServiceImpl : AuthService {
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
     override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
 
-    override fun save(staffId: String?,
-                      phoneNumber: String?,
-                      socialId: String?,
-                      email: String?,
-                      password: String?,
-                      role: Role?,
-                      deviceId: String?,
-                      deviceName: String?,
-                      platform: String?): AccountDTO? {
+    override fun saveAccount(staffId: String?,
+                             phoneNumber: String?,
+                             socialId: String?,
+                             email: String?,
+                             password: String?,
+                             role: Role?,
+                             deviceId: String?,
+                             deviceName: String?,
+                             platform: String?): AccountDTO? {
 
         // create and save device
         val devices = arrayListOf<DeviceBean?>()
-        val device = deviceRepository.save(DeviceBean(
+
+        val device = saveDevice(DeviceBean(
                 deviceId = deviceId,
                 deviceName = deviceName,
                 platform = Platform.valueOf(platform ?: "")))
+
         devices.add(device)
 
         // create and save user
         val user = userRepository.insert(UserBean())
-        val account = AccountBean(
+
+        val result = accountRepository.insert(AccountBean(
                 socialId = socialId,
                 email = email,
                 phoneNumber = phoneNumber,
                 password = encryptPassword(password),
-                staffId = staffId,
+                registerTime = Date.from(Instant.now()),
+                collaboratorId = staffId,
+                devices = devices,
                 role = role,
-                info = user,
-                devices = devices
-        )
-        val result = accountRepository.insert(account)
+                info = user
+        ))
 
+        // return dto
         return AccountDTO(
                 id = result.id,
                 socialId = result.socialId,
                 email = result.email,
                 phoneNumber = result.phoneNumber,
                 active = result.active,
-                verified = result.emailVerified,
-                staffId = result.staffId,
+
+                emailVerified = result.emailVerified,
+                phoneVerified = result.phoneVerified,
+
+                registerTime = result.registerTime,
+                emailVerifiedTime = result.emailVerifiedTime,
+                phoneVerifiedTime = result.phoneVerifiedTime,
+
+                collaboratorId = result.collaboratorId,
                 role = result.role,
-                user = result.info,
-                devices = result.devices
+                user = result.info
         )
     }
 
-    override fun updateDevices(account: AccountBean, device: DeviceBean): AccountDTO? {
-        deviceRepository.save(device)
-        val result =  accountRepository.save(account)
+    override fun saveDevice(device: DeviceBean): DeviceBean? = deviceRepository.save(device)
+
+    override fun login(account: AccountBean): AccountDTO? {
+
+        val result = accountRepository.save(account)
+
+        // insert login history
+        loginHistoryRepository.insert(LoginHistoryBean(
+                accountId = result.id,
+                deviceId = account.devices?.last(),
+                loginTime = Date.from(Instant.now())
+        ))
+
+        // return dto
         return AccountDTO(
                 id = result.id,
                 socialId = result.socialId,
                 email = result.email,
                 phoneNumber = result.phoneNumber,
                 active = result.active,
-                verified = result.emailVerified,
-                staffId = result.staffId,
+
+                emailVerified = result.emailVerified,
+                phoneVerified = result.phoneVerified,
+
+                registerTime = result.registerTime,
+                emailVerifiedTime = result.emailVerifiedTime,
+                phoneVerifiedTime = result.phoneVerifiedTime,
+
+                collaboratorId = result.collaboratorId,
                 role = result.role,
-                user = result.info,
-                devices = result.devices
+                user = result.info
         )
     }
 
