@@ -84,3 +84,18 @@ PORT: 8873
 Custom Service that provides future WebRtc p2p.
 
 PORT: 8874
+
+* P2pController provides HTTP requests handling, model processing and view presentation;
+* Domain package includes domain model and service;
+* Web Socket based Web RTC Signalling Server is located under the Socket directory;
+
+##### API
+Method |      URI           |  Description
+ ------ | --------------------------------------------------- | ------- 
+ Get | "", "/", "/index", "/home", "/main" | main page application web entry point
+ Post | "/room" | process room selection form
+ Get | "/room/{sid}/user/{uuid}" | select a room to enter; sid - room number, uuid - user id
+ Get | "/room/{sid}/user/{uuid}/exit" | a room exit point for the user selected
+ Get | "/room/random" | generates random room number
+ Get | "/offer" | demonstrates sample SDP offer
+ Get | "/stream" | demonstrates streaming video resolution selection
