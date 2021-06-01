@@ -33,22 +33,20 @@ zuul:
     auth-service:
       serviceId: auth-service
       path: /auth/**
-      filters:
-        - name: CircuitBreaker
-          args:
-            name: auth-service
-            fallbackuri: forward:/authFallBack
+#      filters:
+#        - name: CircuitBreaker
+#          args:
+#            name: auth-service
+#            fallbackuri: forward:/authFallBack
     storage-service:
       serviceId: storage-service
       path: /storage/**
     user-service:
       serviceId: user-service
       path: /user/**
-      filters:
-        - name: CircuitBreaker
-          args:
-            name: user-service
-            fallbackuri: forward:/userFallBack
+    p2p-service:
+      serviceId: p2p-service
+      path: /p2p/**
   sensitive-headers: Cookie,Set-Cookie
 
 management:
