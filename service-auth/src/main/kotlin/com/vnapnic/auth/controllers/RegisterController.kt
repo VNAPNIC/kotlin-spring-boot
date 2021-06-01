@@ -1,5 +1,6 @@
 package com.vnapnic.auth.controllers
 
+import com.vnapnic.auth.domain.RegisterRequest
 import com.vnapnic.auth.services.*
 import com.vnapnic.common.exception.SequenceException
 import com.vnapnic.database.enums.Role
@@ -31,57 +32,48 @@ class RegisterController {
      * Staff can use account with the phone number or email
      */
     @RequestMapping(value = ["collaborator"], method = [RequestMethod.POST])
-    fun collaboratorRegister(@RequestBody json: Map<String, String>): Response {
+    fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response {
         try {
-            val code: String? = json["code"]
-            val phoneNumber: String? = json["phoneNumber"]
-            val socialId: String? = json["socialId"]
-            val email: String? = json["email"]
-            val password: String? = json["password"]
-            // Device
-            val deviceName: String? = json["deviceName"]
-            val deviceId: String? = json["deviceId"]
-            val platform: String? = json["platform"]
 
-            log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
+            if (request == null)
+                return Response.failed(error = ErrorCode.WARNING_DATA_FORMAT)
 
-            if (code.isNullOrEmpty())
-                if (code?.startsWith("S") == false)
-                    return Response.failed(error = ErrorCode.CODE_NOT_CORRECT)
+            if (request.code.isNullOrEmpty())
+                return Response.failed(error = ErrorCode.CODE_NOT_CORRECT)
 
-            if (email.isNullOrEmpty())
+            if (request.email.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
 
-            if (!email.isEmail())
+            if (!request.email.isEmail())
                 return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
 
-            if (phoneNumber.isNullOrEmpty())
+            if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
 
-            if (!phoneNumber.isPhoneNumber())
+            if (!request.phoneNumber.isPhoneNumber())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
 
-            if (password.isNullOrEmpty())
+            if (request.password.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
 
-            if (authService.existsByEmail(email))
+            if (authService.existsByEmail(request.email))
                 return Response.failed(error = ErrorCode.EMAIL_IS_EXISTS)
 
-            if (authService.existsByPhoneNumber(phoneNumber))
+            if (authService.existsByPhoneNumber(request.phoneNumber))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
 
             // create staff Id
-            val staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
+            val staffId = sequenceIDToStaffId( "${request.code}${Calendar.getInstance().get(Calendar.YEAR)}")
 
             val dto = authService.saveAccount(staffId = staffId,
-                    phoneNumber = phoneNumber,
-                    socialId = socialId,
-                    email = email,
-                    password = password,
+                    phoneNumber = request.phoneNumber,
+                    socialId = request.socialId,
+                    email = request.email,
+                    password = request.password,
                     role = Role.STAFF,
-                    deviceId = deviceId,
-                    deviceName = deviceName,
-                    platform = platform)
+                    deviceId = request.deviceId,
+                    deviceName = request.deviceName,
+                    platform = request.platform)
 
             return Response.success(data = dto)
         } catch (e: Exception) {
@@ -113,41 +105,33 @@ class RegisterController {
      * Customer only account is phone number
      */
     @RequestMapping(value = ["/customer"], method = [RequestMethod.POST])
-    fun customerRegister(@RequestBody json: Map<String, String>): Response {
+    fun customerRegister(@RequestBody request: RegisterRequest?): Response {
         try {
-            val phoneNumber: String? = json["phoneNumber"]
-            val socialId: String? = json["socialId"]
-            val email: String? = json["email"]
-            val password: String? = json["password"]
-            // Device
-            val deviceName: String? = json["deviceName"]
-            val deviceId: String? = json["deviceId"]
-            val platform: String? = json["platform"]
+            if (request == null)
+                return Response.failed(error = ErrorCode.WARNING_DATA_FORMAT)
 
-            log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
-
-            if (phoneNumber.isNullOrEmpty())
+            if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
 
-            if (!phoneNumber.isPhoneNumber())
+            if (!request.phoneNumber.isPhoneNumber())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
 
-            if (password.isNullOrEmpty())
+            if (request.password.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
 
-            if (authService.existsByPhoneNumber(phoneNumber))
+            if (authService.existsByPhoneNumber(request.phoneNumber))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
 
             val dto = authService.saveAccount(
                     staffId = null,
-                    phoneNumber = phoneNumber,
-                    socialId = socialId,
-                    email = email,
-                    password = password,
+                    phoneNumber = request.phoneNumber,
+                    socialId = request.socialId,
+                    email = request.email,
+                    password = request.password,
                     role = Role.CUSTOMER,
-                    deviceId = deviceId,
-                    deviceName = deviceName,
-                    platform = platform)
+                    deviceId = request.deviceId,
+                    deviceName = request.deviceName,
+                    platform = request.platform)
 
             return Response.success(data = dto)
         } catch (e: Exception) {

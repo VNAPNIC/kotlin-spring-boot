@@ -31,5 +31,7 @@ enum class ErrorCode(val code: Long, val message: String) {
 
     EMAIL_WRONG_FORMAT(1016, "Wrong email format."),
 
-    USER_NOT_FOUND(1017, "User not found.")
+    USER_NOT_FOUND(1017, "User not found."),
+
+    WARNING_DATA_FORMAT(1018, "Warning data format.")
 }
