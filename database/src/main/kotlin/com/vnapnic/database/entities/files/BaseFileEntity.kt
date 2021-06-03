@@ -1,8 +1,8 @@
-package com.vnapnic.database.beans.files
+package com.vnapnic.database.entities.files
 
 import java.util.*
 
-open class BaseFileBean {
+open class BaseFileEntity {
     var recorder: String? = null //Uploader
     var deviceId: String? = null //device uploaded
     var recordDate: Date? = null //Upload time

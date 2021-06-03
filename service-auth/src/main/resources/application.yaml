@@ -1,12 +1,18 @@
+server:
+  port: ${PORT:8871}
+
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka
-server:
-  port: 8871
-  tomcat:
-    protocol-header: x-forwarded-proto
-  forward-headers-strategy: native
+      defaultZone: ${DISCOVERY_URL:http://localhost:8761}/eureka
+  instance:
+    leaseRenewalIntervalInSeconds: 1
+    leaseExpirationDurationInSeconds: 2
+
+ribbon:
+  eureka:
+    enabled: true
+
 spring:
   application:
     name: auth-service

@@ -1,6 +1,7 @@
 package com.vnapnic.storage.controller
 
 import com.vnapnic.storage.services.FilesService
+import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
@@ -21,6 +22,9 @@ class FetchController {
      * https://github.com/linlinjava/litemall/blob/master/litemall-wx-api/src/main/java/org/linlinjava/litemall/wx/web/WxStorageController.java#L53
      */
     @GetMapping("/avatar/{key:.+}")
+    @ApiOperation(
+            value = "fetch avatar"
+    )
     fun fetchAvatar(@PathVariable key: String?) : ResponseEntity<Resource> {
         if (key == null) {
             return ResponseEntity.notFound().build();
@@ -36,6 +40,9 @@ class FetchController {
     }
 
     @GetMapping("/file/{key:.+}")
+    @ApiOperation(
+            value = "fetch file"
+    )
     fun fetchFile(@PathVariable key: String?) : ResponseEntity<Resource>{
         if (key == null) {
             return ResponseEntity.notFound().build();

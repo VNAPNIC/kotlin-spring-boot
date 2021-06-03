@@ -1,4 +1,4 @@
-package com.vnapnic.database.beans
+package com.vnapnic.database.entities
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -12,7 +12,7 @@ import kotlin.collections.ArrayList
 
 @Document(collection = "account")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class AccountBean(
+data class AccountEntity(
         @Id
         @JsonProperty("_id")
         var id: String? = null,
@@ -43,12 +43,12 @@ data class AccountBean(
         @JsonProperty("collaboratorId")
         var collaboratorId: String? = null,
         @JsonProperty("devices")
-        var devices: ArrayList<DeviceBean?>? = null,
+        var devices: ArrayList<DeviceEntity?>? = null,
         @JsonProperty("role")
         var role: Role? = Role.UNKNOWN,
         @JsonProperty("info")
         @DBRef
-        var info: UserBean? = null
+        var info: UserEntity? = null
 ) {
     companion object {
         @Transient

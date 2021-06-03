@@ -3,8 +3,7 @@ package com.vnapnic.gateway.filter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.zuul.ZuulFilter
 import com.netflix.zuul.context.RequestContext
-import com.netflix.zuul.http.HttpServletRequestWrapper
-import com.vnapnic.common.beans.Response
+import com.vnapnic.common.entities.Response
 import com.vnapnic.common.service.JWTService
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.MalformedJwtException
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import javax.servlet.http.HttpServletRequest
 
 @Component
 class JwtFilter : ZuulFilter() {
@@ -32,6 +30,8 @@ class JwtFilter : ZuulFilter() {
         val request = context.request
         val requestUrl = request.requestURL.toString()
         return requestUrl.indexOf("/auth/") <= 0
+                && requestUrl.indexOf("/swagger-ui") <=0
+                && requestUrl.indexOf("/api-docs") <=0
     }
 
     override fun filterType(): String = "pre"

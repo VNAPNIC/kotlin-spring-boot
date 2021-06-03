@@ -4,25 +4,22 @@ import com.vnapnic.common.property.JwtProperty
 import io.jsonwebtoken.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
 import java.security.Key
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
 import javax.security.sasl.AuthenticationException
 import javax.xml.bind.DatatypeConverter
+import com.vnapnic.database.redis.JWT.ACCOUNT_ID
+import com.vnapnic.database.redis.JWT.DEVICE_ID
+import com.vnapnic.database.redis.JWT.REDIS_JWT_ID
+import com.vnapnic.database.redis.JWT.REDIS_JWT
+import com.vnapnic.database.redis.JWT.REDIS_JWT_ACCOUNT_ID
+import com.vnapnic.database.redis.JWT.REDIS_JWT_DEVICE_ID
 
 interface JWTService {
     fun generateJWT(accountId: String?, deviceId: String?): String?
     fun parseJWT(token: String?): Map<String, String>?
 }
-
-const val ACCOUNT_ID = "accountId"
-const val DEVICE_ID = "deviceId"
-
-const val REDIS_JWT_ID = "jwt:id"
-const val REDIS_JWT = "jwt"
-const val REDIS_JWT_DEVICE_ID = "jwt:device"
-const val REDIS_JWT_ACCOUNT_ID = "jwt:account"
 
 open class JWTServiceImpl : JWTService {
 

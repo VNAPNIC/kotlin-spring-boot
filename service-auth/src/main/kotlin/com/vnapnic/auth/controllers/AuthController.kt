@@ -1,14 +1,19 @@
 package com.vnapnic.auth.controllers
 
-import com.vnapnic.auth.domain.AuthRequest
+import com.vnapnic.auth.dto.AuthRequest
+import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.auth.dto.test
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.database.enums.Platform
-import com.vnapnic.common.beans.ErrorCode
-import com.vnapnic.common.beans.Response
+import com.vnapnic.common.entities.ErrorCode
+import com.vnapnic.common.entities.Response
 import com.vnapnic.common.service.JWTService
 import com.vnapnic.common.utils.isEmail
 import com.vnapnic.common.utils.isPhoneNumber
-import com.vnapnic.database.beans.DeviceBean
+import com.vnapnic.database.entities.DeviceEntity
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.Authorization
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestBody
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
 
+@Api(value = "/login", description = "Provider api authentication")
 @RestController
 @RequestMapping("/login")
 class AuthController {
@@ -28,7 +34,11 @@ class AuthController {
     lateinit var jwtService: JWTService
 
     @RequestMapping(value = ["/email"], method = [RequestMethod.POST])
-    fun authWithEmail(@RequestBody request: AuthRequest?): Response {
+    @ApiOperation(
+            value = "Login with email",
+            response  = AccountResponse::class,
+    )
+    fun authWithEmail(@RequestBody request: AuthRequest?): Response<*> {
         try {
 
             if (request == null)
@@ -60,7 +70,7 @@ class AuthController {
                 return Response.failed(error = ErrorCode.EMAIL_PASSWORD_NOT_CORRECT)
 
             // Save device
-            val device = authService.saveDevice(DeviceBean(
+            val device = authService.saveDevice(DeviceEntity(
                     deviceId = request.deviceId,
                     deviceName = request.deviceName,
                     platform = Platform.valueOf(request.platform)
@@ -81,7 +91,11 @@ class AuthController {
     }
 
     @RequestMapping(value = ["/phone"], method = [RequestMethod.POST])
-    fun authWithPhoneNumber(@RequestBody request: AuthRequest?): Response {
+    @ApiOperation(
+            value = "Login with phone number",
+            response = AccountResponse::class
+    )
+    fun authWithPhoneNumber(@RequestBody request: AuthRequest?): Response<*> {
         try {
             if (request == null)
                 return Response.failed(error = ErrorCode.WARNING_DATA_FORMAT)
@@ -113,7 +127,7 @@ class AuthController {
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
 
             // Save device
-            val device = authService.saveDevice(DeviceBean(
+            val device = authService.saveDevice(DeviceEntity(
                     deviceId = request.deviceId,
                     deviceName = request.deviceName,
                     platform = Platform.valueOf(request.platform)

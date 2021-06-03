@@ -1,6 +1,6 @@
 package com.vnapnic.p2p.services
 
-import com.vnapnic.p2p.model.Room
+import com.vnapnic.p2p.entities.Room
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,9 @@ interface P2pService {
 
 @Service
 class P2pServiceImpl @Autowired constructor(private val roomService: RoomService, private val parser: Parser) : P2pService {
+
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+
     override fun displayMainPage(id: Long?, uuid: String?): ModelAndView? {
         val modelAndView = ModelAndView("main")
         modelAndView.addObject("id", id)
@@ -31,7 +33,7 @@ class P2pServiceImpl @Autowired constructor(private val roomService: RoomService
     }
 
     override fun processRoomSelection(sid: String?, uuid: String?, bindingResult: BindingResult?): ModelAndView? {
-        if (bindingResult!!.hasErrors()) {
+        if (bindingResult?.hasErrors() == true) {
             // simplified version, no errors processing
             return ModelAndView(REDIRECT)
         }

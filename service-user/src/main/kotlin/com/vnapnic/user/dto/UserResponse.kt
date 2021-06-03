@@ -1,9 +1,9 @@
 package com.vnapnic.user.dto
 
-import com.vnapnic.database.beans.files.AvatarInfoBean
+import com.vnapnic.database.entities.files.AvatarInfoEntity
 import com.vnapnic.database.enums.Gender
 
-data class UserDTO(
+data class UserResponse(
         var userId: String? = null,
         var firstName: String? = null,
         var lastName: String? = null,
@@ -11,5 +11,5 @@ data class UserDTO(
         var height: Double? = 0.0, // cm
         var gender: Gender? = Gender.OTHER,
         var description: String? = null,
-        var avatar: AvatarInfoBean? = null
+        var avatar: AvatarInfoEntity? = null
 )

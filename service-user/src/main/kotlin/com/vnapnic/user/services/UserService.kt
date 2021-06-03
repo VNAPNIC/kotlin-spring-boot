@@ -1,15 +1,13 @@
 package com.vnapnic.user.services
 
-import com.vnapnic.database.beans.UserBean
+import com.vnapnic.database.entities.UserEntity
 import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
-import com.vnapnic.user.dto.UserDTO
+import com.vnapnic.user.dto.UserResponse
 import com.vnapnic.user.repositories.AccountRepository
 import com.vnapnic.user.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.crossstore.ChangeSetPersister
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
 import kotlin.jvm.Throws
 
 interface UserService {
@@ -18,10 +16,10 @@ interface UserService {
     fun getUserIdByAccountId(accountId: String): String?
 
     @Throws(Exception::class)
-    fun findById(userId: String?): UserDTO
+    fun findById(userId: String?): UserResponse
 
     @Throws(Exception::class)
-    fun updateProfile(userId: String?, firstName: String?, lastName: String?, weight: Double?, height: Double?, gender: Gender, description: String?): UserDTO
+    fun updateProfile(userId: String?, firstName: String?, lastName: String?, weight: Double?, height: Double?, gender: Gender, description: String?): UserResponse
 }
 
 @Service
@@ -40,11 +38,11 @@ class UserServiceImpl : UserService {
     }
 
     @Throws(Exception::class)
-    override fun findById(userId: String?): UserDTO {
+    override fun findById(userId: String?): UserResponse {
         if (userId == null || !userRepository.existsById(userId))
             throw UserNotFound("User not found")
         val result = userRepository.findById(userId).get()
-        return UserDTO(
+        return UserResponse(
                 userId = result.id,
                 firstName = result.firstName,
                 lastName = result.lastName,
@@ -57,7 +55,7 @@ class UserServiceImpl : UserService {
     }
 
     @Throws(Exception::class)
-    override fun updateProfile(userId: String?, firstName: String?, lastName: String?, weight: Double?, height: Double?, gender: Gender, description: String?): UserDTO {
+    override fun updateProfile(userId: String?, firstName: String?, lastName: String?, weight: Double?, height: Double?, gender: Gender, description: String?): UserResponse {
 
         val dto = findById(userId)
         dto.firstName = firstName
@@ -67,7 +65,7 @@ class UserServiceImpl : UserService {
         dto.gender = gender
         dto.description = description
 
-        val user = UserBean(
+        val user = UserEntity(
                 id = userId,
                 firstName = firstName,
                 lastName = lastName,
@@ -79,7 +77,7 @@ class UserServiceImpl : UserService {
         )
 
         val result = userRepository.save(user)
-        return UserDTO(
+        return UserResponse(
                 userId = result.id,
                 firstName = result.firstName,
                 lastName = result.lastName,

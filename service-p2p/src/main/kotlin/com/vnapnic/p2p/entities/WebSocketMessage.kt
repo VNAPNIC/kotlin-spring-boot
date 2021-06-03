@@ -1,4 +1,4 @@
-package com.vnapnic.p2p.model
+package com.vnapnic.p2p.entities
 
 data class WebSocketMessage(
         var from: String? =null,

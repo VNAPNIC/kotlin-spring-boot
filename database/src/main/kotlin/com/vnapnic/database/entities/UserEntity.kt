@@ -1,15 +1,15 @@
-package com.vnapnic.database.beans
+package com.vnapnic.database.entities
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.vnapnic.database.beans.files.AvatarInfoBean
+import com.vnapnic.database.entities.files.AvatarInfoEntity
 import com.vnapnic.database.enums.Gender
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "user")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class UserBean(
+data class UserEntity(
         @Id
         @JsonProperty("_id")
         var id: String? = null,
@@ -26,5 +26,5 @@ data class UserBean(
         @JsonProperty("description")
         var description: String? = null,
         @JsonProperty("avatar")
-        var avatar: AvatarInfoBean? = null
+        var avatar: AvatarInfoEntity? = null
 )

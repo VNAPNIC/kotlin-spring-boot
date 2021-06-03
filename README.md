@@ -1,9 +1,11 @@
-## Learn english by communicate
+## Learn Language Speaking Online
 
 ### Redis
 
+> redis-server
 
-##### Linux
+Linux
+
 ```
 sudo apt-get update
 sudo apt-get install build-essential tcl
@@ -24,7 +26,7 @@ redis-cli info stats
 redis-cli info server
 ```
 
-##### WSL
+> WSL
 
 ```
 sudo apt update && apt upgrade
@@ -66,24 +68,48 @@ http://localhost:8763/hystrix
 PORT: 8763
 
 ### Auth service
-Custom Service that provides future authentication.
+Custom Service that provides feature authentication.
 
 PORT: 8871
 
+Swagger:
+
+http://localhost:8762/api/auth/swagger-ui.htm
+
+http://localhost:8762/api/auth/v2/api-docs
+
 ### User service
-Custom Service that provides future user.
+Custom Service that provides feature user.
 
 PORT: 8872
 
+Swagger:
+
+http://localhost:8762/api/user/swagger-ui.htm
+
+http://localhost:8762/api/user/v2/api-docs
+
 ### Storage service
-Custom Service that provides future files.
+Custom Service that provides feature files.
 
 PORT: 8873
 
+Swagger:
+
+http://localhost:8762/api/storage/swagger-ui.htm
+
+http://localhost:8762/api/storage/v2/api-docs
+
 ### P2p service
-Custom Service that provides future WebRtc p2p.
+Custom Service that provides feature WebRtc p2p.
 
 PORT: 8874
+
+Swagger:
+
+http://localhost:8762/api/p2p/swagger-ui.htm
+
+http://localhost:8762/api/p2p/v2/api-docs
 
 * P2pController provides HTTP requests handling, model processing and view presentation;
 * Domain package includes domain model and service;

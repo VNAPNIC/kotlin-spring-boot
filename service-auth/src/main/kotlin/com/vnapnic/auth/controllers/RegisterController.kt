@@ -1,14 +1,16 @@
 package com.vnapnic.auth.controllers
 
-import com.vnapnic.auth.domain.RegisterRequest
+import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.auth.dto.RegisterRequest
 import com.vnapnic.auth.services.*
 import com.vnapnic.common.exception.SequenceException
 import com.vnapnic.database.enums.Role
-import com.vnapnic.common.beans.ErrorCode
-import com.vnapnic.common.beans.Response
+import com.vnapnic.common.entities.ErrorCode
+import com.vnapnic.common.entities.Response
 import com.vnapnic.common.utils.isEmail
 import com.vnapnic.common.utils.isPhoneNumber
-import com.vnapnic.database.beans.AccountBean
+import com.vnapnic.database.entities.AccountEntity
+import io.swagger.annotations.ApiOperation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestBody
@@ -32,7 +34,11 @@ class RegisterController {
      * Staff can use account with the phone number or email
      */
     @RequestMapping(value = ["collaborator"], method = [RequestMethod.POST])
-    fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response {
+    @ApiOperation(
+            value = "Login with phone number",
+            response = AccountResponse::class
+    )
+    fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
 
             if (request == null)
@@ -83,7 +89,7 @@ class RegisterController {
     }
 
     private fun sequenceIDToStaffId(code: String): String {
-        val sequenceID = sequenceGeneratorService.nextSequenceId(AccountBean.SEQUENCE_NAME)
+        val sequenceID = sequenceGeneratorService.nextSequenceId(AccountEntity.SEQUENCE_NAME)
                 ?: throw SequenceException("can't create staffID")
         return when (sequenceID) {
             in 100..999 -> {
@@ -105,7 +111,11 @@ class RegisterController {
      * Customer only account is phone number
      */
     @RequestMapping(value = ["/customer"], method = [RequestMethod.POST])
-    fun customerRegister(@RequestBody request: RegisterRequest?): Response {
+    @ApiOperation(
+            value = "Login with phone number",
+            response = AccountResponse::class
+    )
+    fun customerRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
             if (request == null)
                 return Response.failed(error = ErrorCode.WARNING_DATA_FORMAT)

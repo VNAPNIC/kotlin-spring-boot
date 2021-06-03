@@ -1,6 +1,6 @@
 package com.vnapnic.p2p.services
 
-import com.vnapnic.p2p.model.Room
+import com.vnapnic.p2p.entities.Room
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession

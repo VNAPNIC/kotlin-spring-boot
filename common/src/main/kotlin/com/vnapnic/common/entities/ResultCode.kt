@@ -1,4 +1,4 @@
-package com.vnapnic.common.beans
+package com.vnapnic.common.entities
 
 enum class ResultCode(val code: Long, val message: String) {
     SUCCESS(200, "Successful"),

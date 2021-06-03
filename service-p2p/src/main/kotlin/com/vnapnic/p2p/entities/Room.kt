@@ -1,4 +1,4 @@
-package com.vnapnic.p2p.model
+package com.vnapnic.p2p.entities
 
 import org.springframework.web.socket.WebSocketSession
 

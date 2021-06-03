@@ -1,6 +1,6 @@
 package com.vnapnic.storage.dto
 
-class FileDTO(
+class FileResponse(
         val fileId: String? = null,
         val fileName: String? = null, //Upload file name
         val fileExtName: String? = null, //Suffix name

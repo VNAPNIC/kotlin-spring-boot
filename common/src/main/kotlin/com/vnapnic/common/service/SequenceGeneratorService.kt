@@ -1,7 +1,7 @@
 package com.vnapnic.common.service
 
 import com.vnapnic.common.exception.SequenceException
-import com.vnapnic.database.beans.SequenceIdBean
+import com.vnapnic.database.entities.SequenceIdEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoOperations
@@ -34,10 +34,10 @@ open class SequenceGeneratorServiceImpl : SequenceGeneratorService {
         // modify in document
         //if no id, throws SequenceException
         //optional, just a way to tell user when the sequence id is failed to generate.
-        val sequenceId: SequenceIdBean = mongoOperations
+        val sequenceId: SequenceIdEntity = mongoOperations
                 .findAndModify(query,
                         update, options,
-                        SequenceIdBean::class.java)
+                        SequenceIdEntity::class.java)
                 ?: throw SequenceException("Unable to get sequence id for key : $key")
 
         return sequenceId.seq

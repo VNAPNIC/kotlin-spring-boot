@@ -1,4 +1,4 @@
-package com.vnapnic.auth.domain
+package com.vnapnic.auth.dto
 
 data class RegisterRequest(
         val code: String?,

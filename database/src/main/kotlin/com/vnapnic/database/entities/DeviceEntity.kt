@@ -1,4 +1,4 @@
-package com.vnapnic.database.beans
+package com.vnapnic.database.entities
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "device")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class DeviceBean(
+data class DeviceEntity(
         @JsonProperty("deviceId")
         @Id
         var deviceId: String? = null,

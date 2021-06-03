@@ -4,11 +4,11 @@ import com.vnapnic.auth.repositories.AccountRepository
 import com.vnapnic.auth.repositories.DeviceRepository
 import com.vnapnic.auth.repositories.LoginHistoryRepository
 import com.vnapnic.auth.repositories.UserRepository
-import com.vnapnic.common.dto.AccountDTO
-import com.vnapnic.database.beans.AccountBean
-import com.vnapnic.database.beans.DeviceBean
-import com.vnapnic.database.beans.LoginHistoryBean
-import com.vnapnic.database.beans.UserBean
+import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.database.entities.AccountEntity
+import com.vnapnic.database.entities.DeviceEntity
+import com.vnapnic.database.entities.LoginHistoryEntity
+import com.vnapnic.database.entities.UserEntity
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.database.enums.Role
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,9 +19,9 @@ import java.util.*
 
 interface AuthService {
 
-    fun findBySocialId(socialId: String?): AccountBean?
-    fun findByPhoneNumber(phoneNumber: String?): AccountBean?
-    fun findByEmail(email: String?): AccountBean?
+    fun findBySocialId(socialId: String?): AccountEntity?
+    fun findByPhoneNumber(phoneNumber: String?): AccountEntity?
+    fun findByEmail(email: String?): AccountEntity?
 
     fun existsBySocialId(socialId: String?): Boolean
     fun existsByEmail(email: String): Boolean
@@ -35,11 +35,11 @@ interface AuthService {
                     role: Role?,
                     deviceId: String?,
                     deviceName: String?,
-                    platform: String?): AccountDTO?
+                    platform: String?): AccountResponse?
 
-    fun saveDevice(device: DeviceBean): DeviceBean?
+    fun saveDevice(device: DeviceEntity): DeviceEntity?
 
-    fun login(account: AccountBean): AccountDTO?
+    fun login(account: AccountEntity): AccountResponse?
 
     fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
@@ -63,9 +63,9 @@ class AuthServiceImpl : AuthService {
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
-    override fun findBySocialId(socialId: String?): AccountBean? = accountRepository.findBySocialId(socialId)
-    override fun findByPhoneNumber(phoneNumber: String?): AccountBean? = accountRepository.findByPhoneNumber(phoneNumber)
-    override fun findByEmail(email: String?): AccountBean? = accountRepository.findByEmail(email)
+    override fun findBySocialId(socialId: String?): AccountEntity? = accountRepository.findBySocialId(socialId)
+    override fun findByPhoneNumber(phoneNumber: String?): AccountEntity? = accountRepository.findByPhoneNumber(phoneNumber)
+    override fun findByEmail(email: String?): AccountEntity? = accountRepository.findByEmail(email)
 
     override fun existsBySocialId(socialId: String?): Boolean = accountRepository.existsBySocialId(socialId)
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
@@ -79,12 +79,12 @@ class AuthServiceImpl : AuthService {
                              role: Role?,
                              deviceId: String?,
                              deviceName: String?,
-                             platform: String?): AccountDTO? {
+                             platform: String?): AccountResponse? {
 
         // create and save device
-        val devices = arrayListOf<DeviceBean?>()
+        val devices = arrayListOf<DeviceEntity?>()
 
-        val device = saveDevice(DeviceBean(
+        val device = saveDevice(DeviceEntity(
                 deviceId = deviceId,
                 deviceName = deviceName,
                 platform = Platform.valueOf(platform ?: "")))
@@ -92,9 +92,9 @@ class AuthServiceImpl : AuthService {
         devices.add(device)
 
         // create and save user
-        val user = userRepository.insert(UserBean())
+        val user = userRepository.insert(UserEntity())
 
-        val result = accountRepository.insert(AccountBean(
+        val result = accountRepository.insert(AccountEntity(
                 socialId = socialId,
                 email = email,
                 phoneNumber = phoneNumber,
@@ -107,7 +107,7 @@ class AuthServiceImpl : AuthService {
         ))
 
         // return dto
-        return AccountDTO(
+        return AccountResponse(
                 id = result.id,
                 socialId = result.socialId,
                 email = result.email,
@@ -127,21 +127,21 @@ class AuthServiceImpl : AuthService {
         )
     }
 
-    override fun saveDevice(device: DeviceBean): DeviceBean? = deviceRepository.save(device)
+    override fun saveDevice(device: DeviceEntity): DeviceEntity? = deviceRepository.save(device)
 
-    override fun login(account: AccountBean): AccountDTO? {
+    override fun login(account: AccountEntity): AccountResponse? {
 
         val result = accountRepository.save(account)
 
         // insert login history
-        loginHistoryRepository.insert(LoginHistoryBean(
+        loginHistoryRepository.insert(LoginHistoryEntity(
                 accountId = result.id,
                 deviceId = account.devices?.last(),
                 loginTime = Date.from(Instant.now())
         ))
 
         // return dto
-        return AccountDTO(
+        return AccountResponse(
                 id = result.id,
                 socialId = result.socialId,
                 email = result.email,

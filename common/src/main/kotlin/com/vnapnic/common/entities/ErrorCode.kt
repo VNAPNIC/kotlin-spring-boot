@@ -1,4 +1,4 @@
-package com.vnapnic.common.beans
+package com.vnapnic.common.entities
 
 enum class ErrorCode(val code: Long, val message: String) {
 

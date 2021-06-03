@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home page</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.css"
+          rel="stylesheet">
+</head>
+<body>
+
+<div class="ui container">
+
+    <h1>Spring MVC 5 WebSocket</h1>
+
+    <div class="two column grid">
+        <div class="row">
+            <div class="column">
+                <label for="myMessage">Message</label>
+            </div>
+
+            <div class="column">
+                <div class="ui input">
+                    <input type="text" id="myMessage">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <label for="output">Response from Server</label>
+            </div>
+
+            <div class="column">
+                <textarea rows="8" cols="50" id="output" readonly="readonly"></textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <button class="ui button" onclick="send()">Send</button>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    const socketConn = new WebSocket('ws://localhost:8762/api/p2p/signal');
+
+    function send() {
+        const clientMsg = document.getElementById('myMessage');
+
+        if (clientMsg.value) {
+            socketConn.send(clientMsg.value);
+        }
+    }
+
+    socketConn.onmessage = (e) => {
+
+        const output = document.getElementById('output');
+
+        output.value += `${e.data}\n`;
+    }
+</script>
+</body>
+</html>

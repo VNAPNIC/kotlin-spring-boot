@@ -1,11 +1,13 @@
 server:
-  port: 8761
+  port: ${PORT:8761}
 eureka:
   instance:
     hostname: localhost
   client:
     registerWithEureka: false
     fetchRegistry: false
+  server:
+    enableSelfPreservation: false
 management:
   endpoints:
     web:

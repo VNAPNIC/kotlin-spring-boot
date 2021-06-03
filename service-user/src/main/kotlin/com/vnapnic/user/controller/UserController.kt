@@ -1,14 +1,16 @@
 package com.vnapnic.user.controller
 
-import com.vnapnic.common.beans.ErrorCode
-import com.vnapnic.common.beans.Response
-import com.vnapnic.common.service.ACCOUNT_ID
-import com.vnapnic.common.service.DEVICE_ID
+import com.vnapnic.common.entities.ErrorCode
+import com.vnapnic.common.entities.Response
 import com.vnapnic.common.service.JWTService
 import com.vnapnic.common.utils.JWTUtils
 import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
+import com.vnapnic.database.redis.JWT.ACCOUNT_ID
+import com.vnapnic.database.redis.JWT.DEVICE_ID
+import com.vnapnic.user.dto.UserResponse
 import com.vnapnic.user.services.UserService
+import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
@@ -23,9 +25,13 @@ class UserController {
     lateinit var jwtService: JWTService
 
     @RequestMapping(value = ["/update"], method = [RequestMethod.PUT])
+    @ApiOperation(
+            value = "fetch file",
+            response = UserResponse::class
+    )
     fun updateProfile(
             @RequestHeader headers: MultiValueMap<String, String>,
-            @RequestBody json: Map<String, String>): Response {
+            @RequestBody json: Map<String, String>): Response<*> {
         try {
             val acceptToken = JWTUtils.tokenFromBearerToken(headers["authorization"]?.get(0))
             val claims = jwtService.parseJWT(acceptToken)
@@ -61,8 +67,12 @@ class UserController {
         }
     }
 
+    @ApiOperation(
+            value = "fetch file",
+            response = UserResponse::class
+    )
     @RequestMapping(value = ["/{key:.+}"], method = [RequestMethod.GET])
-    fun getUserInfo(@PathVariable key: String?): Response {
+    fun getUserInfo(@PathVariable key: String?): Response<*> {
         if (key.isNullOrEmpty())
             return Response.failed(error = ErrorCode.USER_NOT_FOUND)
         return try {

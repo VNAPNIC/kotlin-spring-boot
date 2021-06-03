@@ -1,11 +1,11 @@
 package com.vnapnic.storage.services
 
-import com.vnapnic.database.beans.UserBean
-import com.vnapnic.database.beans.files.AvatarInfoBean
-import com.vnapnic.database.beans.files.FileInfoBean
+import com.vnapnic.database.entities.UserEntity
+import com.vnapnic.database.entities.files.AvatarInfoEntity
+import com.vnapnic.database.entities.files.FileInfoEntity
 import com.vnapnic.database.exception.UnsupportedMediaType
 import com.vnapnic.database.storage.*
-import com.vnapnic.storage.dto.FileDTO
+import com.vnapnic.storage.dto.FileResponse
 import com.vnapnic.storage.repositories.AccountRepository
 import com.vnapnic.storage.repositories.AvatarRepository
 import com.vnapnic.storage.repositories.FilesRepository
@@ -26,19 +26,19 @@ interface FilesStorageService {
     fun init()
 
     @Throws(Exception::class)
-    fun saveAvatarToUser(avatarInfo: AvatarInfoBean)
+    fun saveAvatarToUser(avatarInfo: AvatarInfoEntity)
 
     @Throws(Exception::class)
-    fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
+    fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse
 
     @Throws(Exception::class)
-    fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
+    fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse
 
     @Throws(Exception::class)
-    fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
+    fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse
 
     @Throws(Exception::class)
-    fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO
+    fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse
 }
 
 @Service
@@ -82,19 +82,19 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveAvatarToUser(avatarInfo: AvatarInfoBean) {
+    override fun saveAvatarToUser(avatarInfo: AvatarInfoEntity) {
         val query = Query(Criteria.where("_id").`is`(avatarInfo.recorder))
         val update = Update().set("avatar", avatarInfo)
-        mongoOperations.updateFirst(query, update, UserBean::class.java)
+        mongoOperations.updateFirst(query, update, UserEntity::class.java)
     }
 
     @Throws(Exception::class)
-    override fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
+    override fun saveAvatar(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse {
         val account = accountId?.let { accountRepository.findById(it) } ?: throw Exception("can't save avatar to user")
 
         val file = localStorage.storeImage(avatarPath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
 
-        val avatarInfo = AvatarInfoBean()
+        val avatarInfo = AvatarInfoEntity()
         avatarInfo.recorder = account.get().info?.id
         avatarInfo.deviceId = deviceId
         avatarInfo.recordDate = Date(file.name.split(".")[0].toLong())
@@ -104,7 +104,7 @@ class FilesStorageServiceImpl : FilesStorageService {
         avatarInfo.contentType = Files.probeContentType(file.toPath())
         val result = avatarRepository.save(avatarInfo)
         saveAvatarToUser(result)
-        return FileDTO(
+        return FileResponse(
                 fileId = result.id,
                 fileName = result.fileName,
                 fileExtName = result.fileExtName,
@@ -113,7 +113,7 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
+    override fun saveFiles(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse {
         if (multipartFile.originalFilename == null)
             throw UnsupportedMediaType("Upload file fail.")
 
@@ -130,9 +130,9 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
+    override fun saveImage(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse {
         val file = localStorage.storeImage(imagePath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
-        val fileInfo = FileInfoBean()
+        val fileInfo = FileInfoEntity()
         fileInfo.recorder = accountId
         fileInfo.deviceId = deviceId
         fileInfo.recordDate = Date(file.name.split(".")[0].toLong())
@@ -142,7 +142,7 @@ class FilesStorageServiceImpl : FilesStorageService {
         fileInfo.contentType = Files.probeContentType(file.toPath())
 
         val result = filesRepository.save(fileInfo)
-        return FileDTO(
+        return FileResponse(
                 fileId = result.id,
                 fileName = result.fileName,
                 fileExtName = result.fileExtName,
@@ -151,9 +151,9 @@ class FilesStorageServiceImpl : FilesStorageService {
     }
 
     @Throws(Exception::class)
-    override fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileDTO {
+    override fun saveVideo(accountId: String?, deviceId: String?, multipartFile: MultipartFile): FileResponse {
         val file = localStorage.storeVideo(videoPath, multipartFile.inputStream, multipartFile.size, multipartFile.originalFilename)
-        val fileInfo = FileInfoBean()
+        val fileInfo = FileInfoEntity()
         fileInfo.recorder = accountId
         fileInfo.deviceId = deviceId
         fileInfo.recordDate = Date(file.name.split(".")[0].toLong())
@@ -163,7 +163,7 @@ class FilesStorageServiceImpl : FilesStorageService {
         fileInfo.contentType = Files.probeContentType(file.toPath())
 
         val result = filesRepository.save(fileInfo)
-        return FileDTO(
+        return FileResponse(
                 fileId = result.id,
                 fileName = result.fileName,
                 fileExtName = result.fileExtName,

@@ -1,15 +1,16 @@
 package com.vnapnic.storage.controller
 
-import com.vnapnic.common.beans.ErrorCode
-import com.vnapnic.common.beans.Response
-import com.vnapnic.common.beans.ResultCode
-import com.vnapnic.common.service.ACCOUNT_ID
-import com.vnapnic.common.service.DEVICE_ID
+import com.vnapnic.common.entities.ErrorCode
+import com.vnapnic.common.entities.Response
+import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
 import com.vnapnic.common.utils.JWTUtils
 import com.vnapnic.database.exception.UnsupportedMediaType
-import com.vnapnic.storage.dto.FileDTO
+import com.vnapnic.database.redis.JWT.ACCOUNT_ID
+import com.vnapnic.database.redis.JWT.DEVICE_ID
+import com.vnapnic.storage.dto.FileResponse
 import com.vnapnic.storage.services.FilesStorageService
+import io.swagger.annotations.ApiOperation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.MultiValueMap
@@ -30,9 +31,13 @@ class UploadController {
     lateinit var jwtService: JWTService
 
     @PostMapping("/avatar")
+    @ApiOperation(
+            value = "fetch file",
+            response = FileResponse::class
+    )
     fun uploadAvatar(
             @RequestHeader headers: MultiValueMap<String, String>,
-            @RequestParam("file") file: MultipartFile): Response {
+            @RequestParam("file") file: MultipartFile): Response<*> {
         return try {
             val acceptToken = JWTUtils.tokenFromBearerToken(headers["authorization"]?.get(0))
             val claims = jwtService.parseJWT(acceptToken)
@@ -50,16 +55,20 @@ class UploadController {
     }
 
     @PostMapping("/files")
+    @ApiOperation(
+            value = "fetch file",
+            response = FileResponse::class
+    )
     fun uploadFiles(
             @RequestHeader headers: MultiValueMap<String, String>,
-            @RequestParam("files") files: ArrayList<MultipartFile>): Response {
+            @RequestParam("files") files: ArrayList<MultipartFile>): Response<*> {
         return try {
             val acceptToken = JWTUtils.tokenFromBearerToken(headers["authorization"]?.get(0))
             val claims = jwtService.parseJWT(acceptToken)
             val accountId = claims?.get(ACCOUNT_ID)
             val deviceId = claims?.get(DEVICE_ID)
 
-            val results = arrayListOf<FileDTO?>()
+            val results = arrayListOf<FileResponse?>()
 
             files.stream().forEach {
                 val dto = storageService.saveFiles(accountId, deviceId, it)

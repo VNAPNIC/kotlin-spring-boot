@@ -1,7 +1,7 @@
-package com.vnapnic.database.beans.files
+package com.vnapnic.database.entities.files
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "files")
-data class FileInfoBean(@Id var id: String? = null) : BaseFileBean()
+data class FileInfoEntity(@Id var id: String? = null) : BaseFileEntity()

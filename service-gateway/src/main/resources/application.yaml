@@ -1,5 +1,12 @@
 server:
-  port: 8762
+  port: ${PORT:8762}
+endpoints:
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
+  health:
+    sensitive: false
 spring:
   application:
     name: gateway
@@ -14,12 +21,27 @@ spring:
     host: 127.0.0.1
     port: 6379
     timeout: 60000
+  cloud:
+    gateway:
+      filter:
+        remove-non-proxy-headers:
+          headers:
+            - Proxy-Authenticate
+            - Proxy-Authorization
+            - Keep-Alive
+            - TE
+            - Trailer
+            - Transfer-Encoding
 eureka:
   client:
     healthcheck:
       enabled: true
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${DISCOVERY_URL:http://localhost:8761}/eureka/
+    registerWithEureka: false
+ribbon:
+  eureka:
+    enabled: true
 
 zuul:
   host:
@@ -47,6 +69,7 @@ zuul:
     p2p-service:
       serviceId: p2p-service
       path: /p2p/**
+      stripPrefix: false
   sensitive-headers: Cookie,Set-Cookie
 
 management:
@@ -58,12 +81,6 @@ feign:
   histrix:
     enabled: false
 
-ribbon:
-  ReadTimeout: 60000
-  ConnectTimeout: 60000
-  eager-load:
-      enabled: true
-
 auth-service:
   ribbon:
     ReadTimeout: 60000
@@ -71,6 +88,12 @@ auth-service:
     eager-load:
       enabled: true
 user-service:
+  ribbon:
+    ReadTimeout: 60000
+    ConnectTimeout: 60000
+    eager-load:
+      enabled: true
+storage-service:
   ribbon:
     ReadTimeout: 60000
     ConnectTimeout: 60000
