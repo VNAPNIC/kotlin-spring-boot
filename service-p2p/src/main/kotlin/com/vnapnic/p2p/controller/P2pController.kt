@@ -14,7 +14,7 @@ class MainController @Autowired constructor() {
     @Autowired
     lateinit var p2pService: P2pService
 
-    @GetMapping(*["", "/", "/index", "/home", "/main"])
+    @GetMapping("", "/", "/index", "/home", "/main")
     fun displayMainPage(id: Long?, uuid: String?): ModelAndView? {
         return p2pService.displayMainPage(id, uuid)
     }

@@ -1,5 +1,6 @@
 server:
   port: ${PORT:8874}
+  address: 10.32.25.11
 
 eureka:
   client:

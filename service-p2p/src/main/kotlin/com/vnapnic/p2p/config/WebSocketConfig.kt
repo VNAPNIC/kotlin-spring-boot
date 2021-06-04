@@ -1,6 +1,6 @@
 package com.vnapnic.p2p.config
 
-import com.vnapnic.p2p.socket.SignalHandler
+import com.vnapnic.p2p.component.SignalHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

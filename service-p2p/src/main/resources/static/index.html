@@ -31,33 +31,131 @@
             </div>
 
             <div class="column">
-                <textarea rows="8" cols="50" id="output" readonly="readonly"></textarea>
+                <textarea rows="14" cols="70" id="output" readonly="readonly"></textarea>
             </div>
         </div>
 
-        <div class="row">
-            <button class="ui button" onclick="send()">Send</button>
+        <div class="column">
+
+            <div class="row">
+                <button class="ui button" onclick="join()">Join</button>
+            </div>
+
+            <div class="row">
+                <button class="ui button" onclick="leave()">leave</button>
+            </div>
+            <div class="row">
+                <button class="ui button" onclick="text()">text</button>
+            </div>
+
+            <div class="row">
+                <button class="ui button" onclick="offer()">offer</button>
+            </div>
+            <div class="row">
+                <button class="ui button" onclick="answer()">answer</button>
+            </div>
+            <div class="row">
+                <button class="ui button" onclick="ice()">ice</button>
+            </div>
         </div>
 
     </div>
 </div>
+</div>
 
 
 <script>
-    const socketConn = new WebSocket('ws://localhost:8762/api/p2p/signal');
+    const socketConn = new WebSocket('ws://10.32.25.11:8874/signal');
 
-    function send() {
+    function join() {
+        const clientMsg = document.getElementById('myMessage');
+        if (clientMsg.value) {
+            let msgJSON = JSON.stringify({
+                from: "Hai nam",
+                type: 'join',
+                data: clientMsg.value
+            });
+            socketConn.send(msgJSON);
+        }
+    }
+
+    function leave() {
+        const clientMsg = document.getElementById('myMessage');
+        if (clientMsg.value) {
+            let msgJSON = JSON.stringify({
+                from: "Hai nam",
+                type: 'leave',
+                data: clientMsg.value
+            });
+            socketConn.send(msgJSON);
+        }
+    }
+
+    function text() {
+        const clientMsg = document.getElementById('myMessage');
+        if (clientMsg.value) {
+            let msgJSON = JSON.stringify({
+                from: "Hai nam",
+                type: 'text',
+                data: clientMsg.value
+            });
+            socketConn.send(msgJSON);
+        }
+    }
+
+    function offer() {
         const clientMsg = document.getElementById('myMessage');
 
         if (clientMsg.value) {
-            socketConn.send(clientMsg.value);
+
+            let msgJSON = JSON.stringify({
+                from: "Hai nam",
+                type: 'offer',
+                candidate: 'candidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidate',
+                sdp: 'sdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdp',
+                data: clientMsg.value
+            });
+
+            socketConn.send(msgJSON);
+        }
+    }
+
+    function answer() {
+        const clientMsg = document.getElementById('myMessage');
+
+        if (clientMsg.value) {
+
+            let msgJSON = JSON.stringify({
+                from: "Hai nam",
+                type: 'answer',
+                candidate: 'candidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidate',
+                sdp: 'sdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdp',
+                data: clientMsg.value
+            });
+
+            socketConn.send(msgJSON);
+        }
+    }
+
+    function ice() {
+        const clientMsg = document.getElementById('myMessage');
+
+        if (clientMsg.value) {
+
+            let msgJSON = JSON.stringify({
+                from: "Hai nam",
+                type: 'ice',
+                candidate: 'candidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidatecandidate',
+                sdp: 'sdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdpsdp',
+                data: clientMsg.value
+            });
+
+            socketConn.send(msgJSON);
         }
     }
 
     socketConn.onmessage = (e) => {
-
         const output = document.getElementById('output');
-
         output.value += `${e.data}\n`;
     }
 </script>
