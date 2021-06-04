@@ -8,6 +8,7 @@ eureka:
   instance:
     leaseRenewalIntervalInSeconds: 1
     leaseExpirationDurationInSeconds: 2
+    prefer-ip-address: true
 
 ribbon:
   eureka:

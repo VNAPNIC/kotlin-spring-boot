@@ -1,6 +1,5 @@
 server:
   port: ${PORT:8874}
-  address: 10.32.25.11
 
 eureka:
   client:
@@ -9,6 +8,7 @@ eureka:
   instance:
     leaseRenewalIntervalInSeconds: 1
     leaseExpirationDurationInSeconds: 2
+    prefer-ip-address: true
 
 ribbon:
   eureka:
