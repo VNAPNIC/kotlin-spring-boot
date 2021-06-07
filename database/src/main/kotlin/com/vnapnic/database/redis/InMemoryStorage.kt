@@ -1,6 +1,6 @@
 package com.vnapnic.database.redis
 
-object JWT{
+object JWT {
     const val ACCOUNT_ID = "accountId"
     const val DEVICE_ID = "deviceId"
 
@@ -8,4 +8,8 @@ object JWT{
     const val REDIS_JWT = "jwt"
     const val REDIS_JWT_DEVICE_ID = "jwt:device"
     const val REDIS_JWT_ACCOUNT_ID = "jwt:account"
+}
+
+object WSSession {
+    const val SESSION = "session"
 }

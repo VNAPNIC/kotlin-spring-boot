@@ -1,5 +1,6 @@
 package com.vnapnic.p2p.config
 
+import com.vnapnic.p2p.component.CallHandler
 import com.vnapnic.p2p.component.SignalHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -17,8 +18,12 @@ class WebSocketConfig : WebSocketConfigurer {
     @Autowired
     lateinit var signalHandler: SignalHandler
 
+    @Autowired
+    lateinit var callHandler: CallHandler
+
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(signalHandler, "/signal")
+                .addHandler(callHandler, "/call")
                 .addInterceptors(HttpSessionHandshakeInterceptor()).setAllowedOrigins("*")
     }
 

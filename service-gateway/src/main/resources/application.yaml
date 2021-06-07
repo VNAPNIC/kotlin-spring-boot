@@ -1,14 +1,6 @@
 server:
   port: ${PORT:8762}
 
-endpoints:
-  restart:
-    enabled: true
-  shutdown:
-    enabled: true
-  health:
-    sensitive: false
-
 spring:
   application:
     name: gateway
@@ -19,52 +11,65 @@ spring:
     host: 127.0.0.1
     port: 6379
     timeout: 60000
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # Turn on the function of dynamically created routing from the registration center, using the micro service name to route
+          lower-case-service-id: true
+      #      globalcors:
+#        cors-configurations:
+#          '[/**]': # Match all requests
+#            allowedOrigins: "*" #Cross-domain processing allows all domains
+#            allowedMethods: # Supported methods
+#              - GET
+#              - POST
+#              - PUT
+#              - DELETE
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: storage-service
+          uri: lb://storage-service
+          predicates:
+            - Path=/api/storage/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+        - id: p2p-service
+          uri: lb://p2p-service
+          predicates:
+            - Path=/api/p2p/**
+
+endpoints:
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
+  health:
+    sensitive: false
 
 eureka:
   client:
     healthcheck:
       enabled: true
+    register-with-eureka: true # register him self at eureka
+    fetch-registry: true # pull down a local copy of the registries
     serviceUrl:
       defaultZone: ${DISCOVERY_URL:http://localhost:8761}/eureka/
-#    registerWithEureka: false
-#    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-
 ribbon:
   eureka:
     enabled: true
   ReadTimeout: 10000
-
-zuul:
-  host:
-    connect-timeout-millis: 10000
-    socket-timeout-millis: 60000
-  # Disable accessing services using service name (i.e. gallery-service).
-  # They should be only accessed through the path defined below.
-  ignoredServices: '*'
-  prefix: /api
-  routes:
-    auth-service:
-      serviceId: auth-service
-      path: /auth/**
-    storage-service:
-      serviceId: storage-service
-      path: /storage/**
-    user-service:
-      serviceId: user-service
-      path: /user/**
-    p2p-service:
-      serviceId: p2p-service
-      path: /p2p/**
-  sensitive-headers: Cookie,Set-Cookie
 
 management:
   endpoints:
     web:
       exposure:
         include: hystrix.stream
-
 
 hystrix:
   command:
@@ -74,3 +79,8 @@ hystrix:
           strategy: THREAD
           thread:
             timeoutInMilliseconds: 60000
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
