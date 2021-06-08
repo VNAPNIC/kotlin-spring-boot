@@ -1,19 +1,8 @@
 server:
   port: ${PORT:8873}
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${DISCOVERY_URL:http://localhost:8761}/eureka
-  instance:
-    leaseRenewalIntervalInSeconds: 1
-    leaseExpirationDurationInSeconds: 2
-
-ribbon:
-  eureka:
-    enabled: true
-
 spring:
+  profiles:
+    active: dev
   application:
     name: storage-service
   messages:
@@ -22,13 +11,3 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  # Database
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/Cleaner
-  # Redis
-  redis:
-    database: 2
-    host: 127.0.0.1
-    port: 6379
-    timeout: 60000

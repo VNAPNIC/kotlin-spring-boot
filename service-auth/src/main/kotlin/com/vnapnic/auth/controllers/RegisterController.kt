@@ -33,7 +33,7 @@ class RegisterController {
     /**
      * Staff can use account with the phone number or email
      */
-    @RequestMapping(value = ["collaborator"], method = [RequestMethod.POST])
+    @RequestMapping(value = ["/collaborator"], method = [RequestMethod.POST])
     @ApiOperation(
             value = "Login with phone number",
             response = AccountResponse::class

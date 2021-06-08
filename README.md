@@ -60,13 +60,6 @@ hystrix: http://localhost:8762/actuator/hystrix.stream
 
 PORT: 8762
 
-### HystrixDashboard
-Provides Hystrix Dashboard to monitor services with alternate methods in case of cuircuit break.
-
-http://localhost:8763/hystrix
-
-PORT: 8763
-
 ### Auth service
 Custom Service that provides feature authentication.
 

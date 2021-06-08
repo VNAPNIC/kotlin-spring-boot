@@ -1,15 +1,19 @@
 server:
   port: ${PORT:8761}
+spring:
+  application:
+    name: discovery
 eureka:
   instance:
     hostname: localhost
   client:
-    registerWithEureka: false
-    fetchRegistry: false
+    service-url:
+      defaultZone: http://localhost:${server.port}/eureka/
+    fetch-registry: false
+    register-with-eureka: false
   server:
     enableSelfPreservation: false
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+    lease-expiration-duration-in-seconds: 5
+    evictionIntervalTimerInMs: 1000
+    response-cache-update-interval-ms: 3000
+    use-read-only-response-cache: false
