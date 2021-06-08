@@ -13,16 +13,24 @@ class RouteConfiguration {
     fun initRouteConfiguration(builder: RouteLocatorBuilder): RouteLocator {
         return builder.routes()
                 .route { rs ->
-                    rs.path("/auth/**").uri("lb://AUTH-SERVICE/")
+                    rs.path("/api/auth/**")
+                            .filters { f -> f.rewritePath("^/api/auth", "") }
+                            .uri("lb://AUTH-SERVICE/")
                 }
                 .route { rs: PredicateSpec ->
-                    rs.path("/storage/**").uri("lb://STORAGE-SERVICE/")
+                    rs.path("/api/storage/**")
+                            .filters { f -> f.rewritePath("^/api/storage", "") }
+                            .uri("lb://STORAGE-SERVICE/")
                 }
                 .route { rs ->
-                    rs.path("/user/**").uri("lb://USER-SERVICE/")
+                    rs.path("/api/user/**")
+                            .filters { f -> f.rewritePath("^/api/user", "") }
+                            .uri("lb://USER-SERVICE/")
                 }
                 .route { rs ->
-                    rs.path("/p2p/**").uri("lb://P2P-SERVICE/")
+                    rs.path("/api/p2p/**")
+                            .filters { f -> f.rewritePath("^/api/p2p", "") }
+                            .uri("lb://P2P-SERVICE/")
                 }
                 .build()
     }

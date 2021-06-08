@@ -14,17 +14,15 @@ spring:
     port: 6379
     timeout: 60000
   cloud:
-#    com.vnapnic.discovery:
-#      enabled: true
     gateway:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
       globalcors:
         corsConfigurations:
           '[/**]':
-#            allowedOrigins:
-#              - "*.ourdomain.com"
-#              - "*.ourotherdomain.com"
+            #            allowedOrigins:
+            #              - "*.ourdomain.com"
+            #              - "*.ourotherdomain.com"
             allowCredentials: true
             allowedMethods:
               - GET
@@ -32,10 +30,10 @@ spring:
               - DELETE
               - PUT
               - OPTIONS
-#      discovery:
-#        locator:
-#          enabled: true
-#          lower-case-service-id: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
 
 management:
   endpoints:
