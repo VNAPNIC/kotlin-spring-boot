@@ -85,6 +85,11 @@ open class JWTServiceImpl : JWTService {
     }
 
     override fun parseJWT(token: String?): Map<String, String>? {
+
+        if (token == null){
+            throw AuthenticationException("Token is null or empty.")
+        }
+
         //This line will throw an exception if it is not a signed JWS (as expected)
         val jwsClaims = Jwts.parser()
                 .setSigningKey(DatatypeConverter.parseBase64Binary(property.jwtPhase))
@@ -96,15 +101,14 @@ open class JWTServiceImpl : JWTService {
 
         // Find record from redis
         val record: String? = redisService["$REDIS_JWT:${claims.id}"] as? String
-        if (record == null || !token.equals(record)) {
+        if (record == null || token != record) {
             throw AuthenticationException("Token is expired.")
         }
-
         val maps = mutableMapOf<String, String>()
         maps[ACCOUNT_ID] = redisService["$REDIS_JWT_ACCOUNT_ID:${claims.id}"] as? String
-                ?: throw Exception("can't find account id")
+                ?: throw AuthenticationException("can't find account id")
         maps[DEVICE_ID] = redisService["$REDIS_JWT_DEVICE_ID:${claims.id}"] as? String
-                ?: throw Exception("can't find device id.")
+                ?: throw AuthenticationException("can't find account id")
 
         return maps
     }

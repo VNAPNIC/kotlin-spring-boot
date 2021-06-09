@@ -24,6 +24,11 @@ class UserController {
     @Autowired
     lateinit var jwtService: JWTService
 
+    @RequestMapping(value = ["/hello"], method = [RequestMethod.GET])
+    fun test():String {
+        return "Hello"
+    }
+
     @RequestMapping(value = ["/update"], method = [RequestMethod.PUT])
     @ApiOperation(
             value = "fetch file",

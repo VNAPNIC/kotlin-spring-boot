@@ -32,6 +32,11 @@ class RouteConfiguration {
                             .filters { f -> f.rewritePath("^/api/p2p", "") }
                             .uri("lb://P2P-SERVICE/")
                 }
+                .route { rs ->
+                    rs.path("/ws/p2p/**")
+                            .filters { f -> f.rewritePath("^/ws/p2p", "") }
+                            .uri("lb:ws://P2P-SERVICE/")
+                }
                 .build()
     }
 }

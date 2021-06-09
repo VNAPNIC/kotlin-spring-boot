@@ -55,9 +55,7 @@ PORT: 8761
 
 ### Gateway service Zuul
 Gateway for microservies. It includes JWT and Rolebased Access.
-
-hystrix: http://localhost:8762/actuator/hystrix.stream
-
+``
 PORT: 8762
 
 ### Auth service
