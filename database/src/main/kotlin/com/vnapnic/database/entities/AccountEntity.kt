@@ -30,16 +30,19 @@ data class AccountEntity(
         var cccdBack: String? = null,
         @JsonProperty("active")
         var active: Boolean = false,
+
         @JsonProperty("emailVerified") // Email verification passed
         var emailVerified: Boolean = false,
-        @JsonProperty("emailVerified") // Email verification passed
-        var phoneVerified: Boolean = false,
-        @JsonProperty("registerTime")
-        var registerTime: Date? = null,
         @JsonProperty("emailVerifiedTime")
         var emailVerifiedTime: Date? = null,
+
+        @JsonProperty("phoneVerified") // phone verification passed
+        var phoneVerified: Boolean = false,
         @JsonProperty("phoneVerifiedTime")
         var phoneVerifiedTime: Date? = null,
+
+        @JsonProperty("registerTime")
+        var registerTime: Date? = null,
         @JsonProperty("collaboratorId")
         var collaboratorId: String? = null,
         @JsonProperty("devices")

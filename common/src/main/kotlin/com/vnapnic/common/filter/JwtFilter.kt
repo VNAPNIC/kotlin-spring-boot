@@ -22,7 +22,6 @@ class JwtFilter : ZuulFilter() {
     lateinit var jwtService: JWTService
 
     override fun shouldFilter(): Boolean {
-        log.info("--------------------------------------")
         val context = RequestContext.getCurrentContext()
         val request = context.request
         val requestUrl = request.requestURL.toString()

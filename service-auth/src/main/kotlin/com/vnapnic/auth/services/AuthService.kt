@@ -1,16 +1,19 @@
 package com.vnapnic.auth.services
 
+import com.vnapnic.auth.controllers.RegisterController
 import com.vnapnic.auth.repositories.AccountRepository
 import com.vnapnic.auth.repositories.DeviceRepository
 import com.vnapnic.auth.repositories.LoginHistoryRepository
 import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.common.service.RedisService
 import com.vnapnic.database.entities.AccountEntity
 import com.vnapnic.database.entities.DeviceEntity
 import com.vnapnic.database.entities.LoginHistoryEntity
 import com.vnapnic.database.entities.UserEntity
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.database.enums.Role
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -26,6 +29,10 @@ interface AuthService {
     fun existsBySocialId(socialId: String?): Boolean
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean
+
+    fun verifyCode(phoneNumber: String)
+
+    fun getVerifyCode(phoneNumber: String): Int?
 
     fun saveAccount(staffId: String?,
                     phoneNumber: String?,
@@ -47,6 +54,7 @@ interface AuthService {
 
 @Service
 class AuthServiceImpl : AuthService {
+    private val log = LoggerFactory.getLogger(RegisterController::class.java)
 
     @Autowired
     lateinit var accountRepository: AccountRepository
@@ -63,6 +71,9 @@ class AuthServiceImpl : AuthService {
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
+    @Autowired
+    lateinit var redisService: RedisService
+
     override fun findBySocialId(socialId: String?): AccountEntity? = accountRepository.findBySocialId(socialId)
     override fun findByPhoneNumber(phoneNumber: String?): AccountEntity? = accountRepository.findByPhoneNumber(phoneNumber)
     override fun findByEmail(email: String?): AccountEntity? = accountRepository.findByEmail(email)
@@ -70,6 +81,13 @@ class AuthServiceImpl : AuthService {
     override fun existsBySocialId(socialId: String?): Boolean = accountRepository.existsBySocialId(socialId)
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
     override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
+
+    override fun getVerifyCode(phoneNumber: String): Int? = redisService[phoneNumber] as? Int
+
+    override fun verifyCode(phoneNumber: String) {
+        redisService[phoneNumber] = 6782
+        redisService.expire(phoneNumber, 30)
+    }
 
     override fun saveAccount(staffId: String?,
                              phoneNumber: String?,

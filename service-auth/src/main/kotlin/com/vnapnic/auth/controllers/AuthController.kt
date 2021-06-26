@@ -1,19 +1,17 @@
 package com.vnapnic.auth.controllers
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.vnapnic.auth.dto.AuthRequest
 import com.vnapnic.auth.dto.AccountResponse
-import com.vnapnic.auth.dto.test
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.service.JWTService
 import com.vnapnic.common.utils.isEmail
-import com.vnapnic.common.utils.isPhoneNumber
 import com.vnapnic.database.entities.DeviceEntity
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.Authorization
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -23,6 +21,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/login")
 class AuthController {
     private val log = LoggerFactory.getLogger(AuthController::class.java)
+
+    val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Autowired
     lateinit var authService: AuthService
@@ -100,7 +100,9 @@ class AuthController {
             if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
 
-            if (!request.phoneNumber.isPhoneNumber())
+            val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
+
+            if (!phoneUtil.isValidNumber(numberProto))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
 
             if (request.password.isNullOrEmpty())
@@ -109,14 +111,14 @@ class AuthController {
             if (request.deviceId.isNullOrEmpty() || request.deviceName.isNullOrEmpty() || request.platform.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.UNSUPPORTED_DEVICE)
 
-            log.info(String.format("request with %s %s", request.phoneNumber, request.password))
+            val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
 
             // Find account with same username, check password
-            if (!authService.existsByPhoneNumber(request.phoneNumber))
+            if (!authService.existsByPhoneNumber(phoneInterNational))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
 
             // get account by phone number
-            val rawAccount = authService.findByPhoneNumber(request.phoneNumber)
+            val rawAccount = authService.findByPhoneNumber(phoneInterNational)
                     ?: return Response.failed(error = ErrorCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
 
             // Validate password

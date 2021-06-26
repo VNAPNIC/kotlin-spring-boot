@@ -1,15 +1,15 @@
 package com.vnapnic.auth.controllers
 
-import com.vnapnic.auth.dto.AccountResponse
-import com.vnapnic.auth.dto.RegisterRequest
-import com.vnapnic.auth.services.*
-import com.vnapnic.common.exception.SequenceException
-import com.vnapnic.database.enums.Role
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.vnapnic.auth.dto.*
+import com.vnapnic.auth.services.AuthService
+import com.vnapnic.auth.services.SequenceGeneratorService
 import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
+import com.vnapnic.common.exception.SequenceException
 import com.vnapnic.common.utils.isEmail
-import com.vnapnic.common.utils.isPhoneNumber
 import com.vnapnic.database.entities.AccountEntity
+import com.vnapnic.database.enums.Role
 import io.swagger.annotations.ApiOperation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +23,8 @@ import java.util.*
 @RequestMapping("/register")
 class RegisterController {
     private val log = LoggerFactory.getLogger(RegisterController::class.java)
+
+    val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Autowired
     lateinit var sequenceGeneratorService: SequenceGeneratorService
@@ -38,6 +40,7 @@ class RegisterController {
             value = "Login with phone number",
             response = AccountResponse::class
     )
+
     fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
 
@@ -56,7 +59,9 @@ class RegisterController {
             if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
 
-            if (!request.phoneNumber.isPhoneNumber())
+            val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
+
+            if (!phoneUtil.isValidNumber(numberProto))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
 
             if (request.password.isNullOrEmpty())
@@ -69,10 +74,11 @@ class RegisterController {
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
 
             // create staff Id
-            val staffId = sequenceIDToStaffId( "${request.code}${Calendar.getInstance().get(Calendar.YEAR)}")
+            val staffId = sequenceIDToStaffId("${request.code}${Calendar.getInstance().get(Calendar.YEAR)}")
+            val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
 
             val dto = authService.saveAccount(staffId = staffId,
-                    phoneNumber = request.phoneNumber,
+                    phoneNumber = phoneInterNational,
                     socialId = request.socialId,
                     email = request.email,
                     password = request.password,
@@ -123,18 +129,22 @@ class RegisterController {
             if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
 
-            if (!request.phoneNumber.isPhoneNumber())
+            val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
+
+            if (!phoneUtil.isValidNumber(numberProto))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
 
             if (request.password.isNullOrEmpty())
                 return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
 
-            if (authService.existsByPhoneNumber(request.phoneNumber))
+            val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+
+            if (authService.existsByPhoneNumber(phoneInterNational))
                 return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
 
             val dto = authService.saveAccount(
                     staffId = null,
-                    phoneNumber = request.phoneNumber,
+                    phoneNumber = phoneInterNational,
                     socialId = request.socialId,
                     email = request.email,
                     password = request.password,

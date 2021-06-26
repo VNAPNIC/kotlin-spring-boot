@@ -27,6 +27,10 @@ class Response<T>(val code: Long = ResultCode.SUCCESS.code,
             return Response(code = ResultCode.SUCCESS.code, message = message, token = token, data = data)
         }
 
+        fun success(token: String? = null, message: String = ResultCode.SUCCESS.message): Response<*> {
+            return Response(code = ResultCode.SUCCESS.code, message = message, token = token, data = null)
+        }
+
         /**
          * Failed to return result
          * @param status error [ResultCode]
