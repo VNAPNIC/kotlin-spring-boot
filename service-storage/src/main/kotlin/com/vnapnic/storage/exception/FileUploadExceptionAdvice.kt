@@ -1,6 +1,5 @@
 package com.vnapnic.storage.exception
 
-import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import org.springframework.web.bind.annotation.ControllerAdvice

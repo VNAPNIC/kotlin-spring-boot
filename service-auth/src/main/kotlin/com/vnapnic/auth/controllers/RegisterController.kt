@@ -4,7 +4,6 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.vnapnic.auth.dto.*
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.auth.services.SequenceGeneratorService
-import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.exception.SequenceException

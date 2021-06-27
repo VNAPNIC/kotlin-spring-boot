@@ -42,16 +42,7 @@ class UserServiceImpl : UserService {
         if (userId == null || !userRepository.existsById(userId))
             throw UserNotFound("User not found")
         val result = userRepository.findById(userId).get()
-        return UserResponse(
-                userId = result.id,
-                firstName = result.firstName,
-                lastName = result.lastName,
-                weight = result.weight,
-                height = result.height,
-                gender = result.gender,
-                description = result.description,
-                avatar = result.avatar
-        )
+        return convertUserEntityToResponse(result)
     }
 
     @Throws(Exception::class)
@@ -77,15 +68,17 @@ class UserServiceImpl : UserService {
         )
 
         val result = userRepository.save(user)
-        return UserResponse(
-                userId = result.id,
-                firstName = result.firstName,
-                lastName = result.lastName,
-                weight = result.weight ?: 0.0,
-                height = result.height ?: 0.0,
-                gender = result.gender,
-                description = result.description,
-                avatar = result.avatar
-        )
+        return convertUserEntityToResponse(result)
     }
+
+    private fun convertUserEntityToResponse(entity: UserEntity?): UserResponse = UserResponse(
+            userId = entity?.id,
+            firstName = entity?.firstName,
+            lastName = entity?.lastName,
+            weight = entity?.weight ?: 0.0,
+            height = entity?.height ?: 0.0,
+            gender = entity?.gender,
+            description = entity?.description,
+            avatar = entity?.avatar
+    )
 }

@@ -46,5 +46,7 @@ enum class ResultCode(val code: Long, val message: String) {
 
     VERIFY_CODE_EXPIRE(1019, "verify code expire."),
 
-    VERIFY_CODE_NOT_CORRECT(1020, "verify code is not correct.")
+    VERIFY_CODE_NOT_CORRECT(1020, "verify code is not correct."),
+
+    WRONG_TOO_MANY_TIME(1021, "Entering a wrong too many times.")
 }

@@ -6,7 +6,10 @@ import com.vnapnic.auth.repositories.DeviceRepository
 import com.vnapnic.auth.repositories.LoginHistoryRepository
 import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.auth.dto.AccountResponse
-import com.vnapnic.common.entities.ErrorCode
+import com.vnapnic.auth.dto.VerifyType
+import com.vnapnic.auth.exception.VerifyCodeExpireException
+import com.vnapnic.auth.exception.VerifyCodeNotCorrectException
+import com.vnapnic.auth.exception.WrongTooManyTimesException
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.RedisService
 import com.vnapnic.database.entities.AccountEntity
@@ -15,6 +18,7 @@ import com.vnapnic.database.entities.LoginHistoryEntity
 import com.vnapnic.database.entities.UserEntity
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.database.enums.Role
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -32,21 +36,26 @@ interface AuthService {
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean
 
-    fun sendVerifyCode(phoneNumber: String): ResultCode
+    fun sendVerifyCode(phoneNumber: String, type: VerifyType): Boolean
 
-    fun getVerifyCode(phoneNumber: String): Int?
+    fun getVerifyCode(phoneNumber: String, type: VerifyType): Int?
 
-    fun verifyCode(phoneNumber: String, code: Int): ResultCode
+    fun verifyCode(phoneNumber: String,
+                   code: Int,
+                   deviceId: String?,
+                   deviceName: String?,
+                   platform: String?,
+                   type: VerifyType): AccountResponse?
 
-    fun saveAccount(staffId: String?,
-                    phoneNumber: String?,
-                    socialId: String?,
-                    email: String?,
-                    password: String?,
-                    role: Role?,
-                    deviceId: String?,
-                    deviceName: String?,
-                    platform: String?): AccountResponse?
+    fun saveAccount(staffId: String? = null,
+                    phoneNumber: String? = null,
+                    socialId: String? = null,
+                    email: String? = null,
+                    password: String? = null,
+                    role: Role? = null,
+                    deviceId: String? = null,
+                    deviceName: String? = null,
+                    platform: String? = null): AccountResponse?
 
     fun saveDevice(device: DeviceEntity): DeviceEntity?
 
@@ -78,6 +87,9 @@ class AuthServiceImpl : AuthService {
     @Autowired
     lateinit var redisService: RedisService
 
+    val verifyFormat = "%s_%s"
+    val verifyCountDownFormat = "%s_%s_countdown"
+
     override fun findBySocialId(socialId: String?): AccountEntity? = accountRepository.findBySocialId(socialId)
     override fun findByPhoneNumber(phoneNumber: String?): AccountEntity? = accountRepository.findByPhoneNumber(phoneNumber)
     override fun findByEmail(email: String?): AccountEntity? = accountRepository.findByEmail(email)
@@ -86,25 +98,61 @@ class AuthServiceImpl : AuthService {
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
     override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
 
-    override fun sendVerifyCode(phoneNumber: String): ResultCode {
-        redisService[phoneNumber] = 6782
-        redisService.expire(phoneNumber, 30)
-        return ResultCode.SUCCESS
+    override fun sendVerifyCode(phoneNumber: String, type: VerifyType): Boolean {
+        val verifyKey = String.format(verifyFormat, type, phoneNumber)
+        val verifyCountDownKey = String.format(verifyCountDownFormat, type, phoneNumber)
+
+        redisService[verifyKey] = 6782
+        redisService.expire(verifyKey, 30)
+
+        redisService[verifyCountDownKey] = 5
+        redisService.expire(verifyCountDownKey, 30)
+
+        return true
     }
 
-    override fun getVerifyCode(phoneNumber: String): Int? {
-        log.info("-----------------> ${redisService.getExpire(phoneNumber)}")
-        return redisService[phoneNumber] as? Int
+    override fun getVerifyCode(phoneNumber: String, type: VerifyType): Int? {
+        val verifyKey = String.format(verifyFormat, type, phoneNumber)
+        val verifyCountDownKey = String.format(verifyCountDownFormat, type, phoneNumber)
+
+        log.info("type -----------------> $type")
+        log.info("Expire -----------------> ${redisService.getExpire(verifyKey)}")
+        log.info("CountDown -----------------> ${redisService[verifyCountDownKey]}")
+        return redisService[verifyKey] as? Int
     }
 
-    override fun verifyCode(phoneNumber: String, code: Int): ResultCode {
-        if ((redisService.getExpire(phoneNumber) ?: -2) <= 0L)
-            return ResultCode.VERIFY_CODE_EXPIRE
+    override fun verifyCode(phoneNumber: String,
+                            code: Int,
+                            deviceId: String?,
+                            deviceName: String?,
+                            platform: String?,
+                            type: VerifyType): AccountResponse? {
 
-        if (redisService[phoneNumber] != code)
-            return ResultCode.VERIFY_CODE_NOT_CORRECT
+        val verifyKey = String.format(verifyFormat, type, phoneNumber)
+        val verifyCountDownKey = String.format(verifyCountDownFormat, type, phoneNumber)
 
-        return ResultCode.SUCCESS
+        val verifyCode = redisService[verifyKey]
+        val countDown = (redisService[verifyCountDownKey] as? Int ?: 0)
+
+        if ((redisService.getExpire(verifyKey) ?: -2) <= 0L)
+            throw VerifyCodeExpireException()
+
+        if (countDown <= 0)
+            throw WrongTooManyTimesException()
+
+        if (verifyCode != code) {
+            redisService[verifyCountDownKey] = countDown - 1
+            throw VerifyCodeNotCorrectException()
+        }
+
+        val result = findByPhoneNumber(phoneNumber)
+
+        val account: AccountResponse? = if (result != null)
+            convertAccountEntityToResponse(result)
+        else
+            saveAccount(phoneNumber = phoneNumber, deviceId = deviceId, deviceName = deviceName, platform = platform)
+
+        return verifyPhoneNumber(account?.id)
     }
 
     override fun saveAccount(staffId: String?,
@@ -134,7 +182,7 @@ class AuthServiceImpl : AuthService {
                 socialId = socialId,
                 email = email,
                 phoneNumber = phoneNumber,
-                password = encryptPassword(password),
+                password = if (password.isNullOrEmpty()) null else encryptPassword(password),
                 registerTime = Date.from(Instant.now()),
                 collaboratorId = staffId,
                 devices = devices,
@@ -143,24 +191,7 @@ class AuthServiceImpl : AuthService {
         ))
 
         // return dto
-        return AccountResponse(
-                id = result.id,
-                socialId = result.socialId,
-                email = result.email,
-                phoneNumber = result.phoneNumber,
-                active = result.active,
-
-                emailVerified = result.emailVerified,
-                phoneVerified = result.phoneVerified,
-
-                registerTime = result.registerTime,
-                emailVerifiedTime = result.emailVerifiedTime,
-                phoneVerifiedTime = result.phoneVerifiedTime,
-
-                collaboratorId = result.collaboratorId,
-                role = result.role,
-                user = result.info
-        )
+        return convertAccountEntityToResponse(result)
     }
 
     override fun saveDevice(device: DeviceEntity): DeviceEntity? = deviceRepository.save(device)
@@ -177,26 +208,52 @@ class AuthServiceImpl : AuthService {
         ))
 
         // return dto
-        return AccountResponse(
-                id = result.id,
-                socialId = result.socialId,
-                email = result.email,
-                phoneNumber = result.phoneNumber,
-                active = result.active,
-
-                emailVerified = result.emailVerified,
-                phoneVerified = result.phoneVerified,
-
-                registerTime = result.registerTime,
-                emailVerifiedTime = result.emailVerifiedTime,
-                phoneVerifiedTime = result.phoneVerifiedTime,
-
-                collaboratorId = result.collaboratorId,
-                role = result.role,
-                user = result.info
-        )
+        return convertAccountEntityToResponse(result)
     }
 
     override fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean = passwordEncoder.matches(rawPassword, encodedPassword)
     override fun encryptPassword(password: String?): String? = passwordEncoder.encode(password)
+
+    private fun verifyPhoneNumber(accountId: String?): AccountResponse? {
+        if (accountId == null)
+            return null
+
+        val account = accountRepository.findById(accountId).get()
+        account.phoneVerified = true
+        account.phoneVerifiedTime = Date.from(Instant.now())
+
+        val result = accountRepository.save(account)
+        return convertAccountEntityToResponse(result)
+    }
+
+    private fun verifyEmail(accountId: String?): AccountResponse? {
+        if (accountId == null)
+            return null
+
+        val account = accountRepository.findById(accountId).get()
+        account.emailVerified = true
+        account.emailVerifiedTime = Date.from(Instant.now())
+
+        val result = accountRepository.save(account)
+        return convertAccountEntityToResponse(result)
+    }
+
+    private fun convertAccountEntityToResponse(entity: AccountEntity?): AccountResponse? = AccountResponse(
+            id = entity?.id,
+            socialId = entity?.socialId,
+            email = entity?.email,
+            phoneNumber = entity?.phoneNumber,
+            active = entity?.active,
+
+            emailVerified = entity?.emailVerified,
+            phoneVerified = entity?.phoneVerified,
+
+            registerTime = entity?.registerTime,
+            emailVerifiedTime = entity?.emailVerifiedTime,
+            phoneVerifiedTime = entity?.phoneVerifiedTime,
+
+            collaboratorId = entity?.collaboratorId,
+            role = entity?.role,
+            user = entity?.info
+    )
 }

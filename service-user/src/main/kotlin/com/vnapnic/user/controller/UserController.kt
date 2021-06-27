@@ -1,7 +1,7 @@
 package com.vnapnic.user.controller
 
-import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
+import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
 import com.vnapnic.common.utils.JWTUtils
 import com.vnapnic.database.enums.Gender

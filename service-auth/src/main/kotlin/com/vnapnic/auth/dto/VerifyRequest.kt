@@ -1,6 +1,17 @@
 package com.vnapnic.auth.dto
 
-data class SendVerifyCodeRequest(
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+enum class VerifyType {
+    PHONE_NUMBER,
+    EMAIL,
+    PASSWORD
+}
+
+data class GetVerifyCodeRequest(
         val email: String?,
         val phoneNumber: String?,
         val dialCode: String?,
@@ -9,6 +20,7 @@ data class SendVerifyCodeRequest(
         val alpha3Code: String?,
         val enShortName: String?,
         val nationality: String?,
+        val type: VerifyType
 )
 
 data class VerifyCodeRequest(
@@ -20,5 +32,9 @@ data class VerifyCodeRequest(
         val alpha3Code: String?,
         val enShortName: String?,
         val nationality: String?,
-        val verifyCode: Int?
+        val verifyCode: Int?,
+        val deviceName: String?,
+        val deviceId: String?,
+        val platform: String?,
+        val type: VerifyType
 )

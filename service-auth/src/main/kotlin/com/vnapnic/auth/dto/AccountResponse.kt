@@ -1,9 +1,7 @@
 package com.vnapnic.auth.dto
 
-import com.google.common.reflect.TypeToken
-import com.vnapnic.common.entities.Response
-import com.vnapnic.database.enums.Role
 import com.vnapnic.database.entities.UserEntity
+import com.vnapnic.database.enums.Role
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -21,5 +19,3 @@ data class AccountResponse(var id: String? = null,
                            val role: Role? = Role.UNKNOWN,
                            val user: UserEntity? = null
 )
-
-fun <T : Any> test(t: T): KClass<out T> = t::class

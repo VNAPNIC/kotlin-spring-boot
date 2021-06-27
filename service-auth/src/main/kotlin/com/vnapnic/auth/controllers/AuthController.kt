@@ -5,7 +5,6 @@ import com.vnapnic.auth.dto.AuthRequest
 import com.vnapnic.auth.dto.AccountResponse
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.database.enums.Platform
-import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
@@ -38,7 +37,6 @@ class AuthController {
     )
     fun authWithEmail(@RequestBody request: AuthRequest?): Response<*> {
         try {
-
             if (request == null)
                 return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
 

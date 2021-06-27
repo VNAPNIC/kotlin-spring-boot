@@ -1,6 +1,5 @@
 package com.vnapnic.storage.controller
 
-import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
