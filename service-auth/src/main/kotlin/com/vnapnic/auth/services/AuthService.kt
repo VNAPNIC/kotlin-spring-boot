@@ -6,6 +6,8 @@ import com.vnapnic.auth.repositories.DeviceRepository
 import com.vnapnic.auth.repositories.LoginHistoryRepository
 import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.common.entities.ErrorCode
+import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.RedisService
 import com.vnapnic.database.entities.AccountEntity
 import com.vnapnic.database.entities.DeviceEntity
@@ -30,9 +32,11 @@ interface AuthService {
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean
 
-    fun verifyCode(phoneNumber: String)
+    fun sendVerifyCode(phoneNumber: String): ResultCode
 
     fun getVerifyCode(phoneNumber: String): Int?
+
+    fun verifyCode(phoneNumber: String, code: Int): ResultCode
 
     fun saveAccount(staffId: String?,
                     phoneNumber: String?,
@@ -82,11 +86,25 @@ class AuthServiceImpl : AuthService {
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
     override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
 
-    override fun getVerifyCode(phoneNumber: String): Int? = redisService[phoneNumber] as? Int
-
-    override fun verifyCode(phoneNumber: String) {
+    override fun sendVerifyCode(phoneNumber: String): ResultCode {
         redisService[phoneNumber] = 6782
         redisService.expire(phoneNumber, 30)
+        return ResultCode.SUCCESS
+    }
+
+    override fun getVerifyCode(phoneNumber: String): Int? {
+        log.info("-----------------> ${redisService.getExpire(phoneNumber)}")
+        return redisService[phoneNumber] as? Int
+    }
+
+    override fun verifyCode(phoneNumber: String, code: Int): ResultCode {
+        if ((redisService.getExpire(phoneNumber) ?: -2) <= 0L)
+            return ResultCode.VERIFY_CODE_EXPIRE
+
+        if (redisService[phoneNumber] != code)
+            return ResultCode.VERIFY_CODE_NOT_CORRECT
+
+        return ResultCode.SUCCESS
     }
 
     override fun saveAccount(staffId: String?,

@@ -6,6 +6,7 @@ import com.vnapnic.auth.services.AuthService
 import com.vnapnic.auth.services.SequenceGeneratorService
 import com.vnapnic.common.entities.ErrorCode
 import com.vnapnic.common.entities.Response
+import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.exception.SequenceException
 import com.vnapnic.common.utils.isEmail
 import com.vnapnic.database.entities.AccountEntity
@@ -45,33 +46,33 @@ class RegisterController {
         try {
 
             if (request == null)
-                return Response.failed(error = ErrorCode.WARNING_DATA_FORMAT)
+                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
 
             if (request.code.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.CODE_NOT_CORRECT)
+                return Response.failed(error = ResultCode.CODE_NOT_CORRECT)
 
             if (request.email.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
+                return Response.failed(error = ResultCode.EMAIL_IS_NULL_BLANK)
 
             if (!request.email.isEmail())
-                return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
+                return Response.failed(error = ResultCode.EMAIL_WRONG_FORMAT)
 
             if (request.phoneNumber.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)
 
             val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
 
             if (!phoneUtil.isValidNumber(numberProto))
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_WRONG_FORMAT)
 
             if (request.password.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
+                return Response.failed(error = ResultCode.PASSWORD_IS_NULL_BLANK)
 
             if (authService.existsByEmail(request.email))
-                return Response.failed(error = ErrorCode.EMAIL_IS_EXISTS)
+                return Response.failed(error = ResultCode.EMAIL_IS_EXISTS)
 
             if (authService.existsByPhoneNumber(request.phoneNumber))
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
 
             // create staff Id
             val staffId = sequenceIDToStaffId("${request.code}${Calendar.getInstance().get(Calendar.YEAR)}")
@@ -90,7 +91,7 @@ class RegisterController {
             return Response.success(data = dto)
         } catch (e: Exception) {
             e.printStackTrace()
-            return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
+            return Response.failed(error = ResultCode.SERVER_UNKNOWN_ERROR)
         }
     }
 
@@ -124,23 +125,23 @@ class RegisterController {
     fun customerRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
             if (request == null)
-                return Response.failed(error = ErrorCode.WARNING_DATA_FORMAT)
+                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
 
             if (request.phoneNumber.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)
 
             val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
 
             if (!phoneUtil.isValidNumber(numberProto))
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_WRONG_FORMAT)
 
             if (request.password.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
+                return Response.failed(error = ResultCode.PASSWORD_IS_NULL_BLANK)
 
             val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
 
             if (authService.existsByPhoneNumber(phoneInterNational))
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
 
             val dto = authService.saveAccount(
                     staffId = null,
@@ -156,7 +157,7 @@ class RegisterController {
             return Response.success(data = dto)
         } catch (e: Exception) {
             e.printStackTrace()
-            return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
+            return Response.failed(error = ResultCode.SERVER_UNKNOWN_ERROR)
         }
     }
 }

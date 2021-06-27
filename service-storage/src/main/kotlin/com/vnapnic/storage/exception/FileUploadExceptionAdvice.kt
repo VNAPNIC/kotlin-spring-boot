@@ -12,6 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 class FileUploadExceptionAdvice : ResponseEntityExceptionHandler() {
     @ExceptionHandler(MaxUploadSizeExceededException::class)
     fun handleMaxSizeException(exc: MaxUploadSizeExceededException?): Response<*> {
-        return Response.failed(ResultCode.EXPECTATION_FAILED, ErrorCode.FILE_TOO_LARGE)
+        return Response.failed(ResultCode.EXPECTATION_FAILED, ResultCode.FILE_TOO_LARGE)
     }
 }

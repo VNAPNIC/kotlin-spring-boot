@@ -47,10 +47,10 @@ class UploadController {
             Response.success(data = dto)
         } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
-            Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
+            Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ResultCode.UNSUPPORTED_MEDIA_TYPE)
         } catch (e: Exception) {
             e.printStackTrace()
-            Response.failed(ResultCode.EXPECTATION_FAILED, ErrorCode.FILE_UPLOAD_FAIL)
+            Response.failed(ResultCode.EXPECTATION_FAILED, ResultCode.FILE_UPLOAD_FAIL)
         }
     }
 
@@ -78,10 +78,10 @@ class UploadController {
             Response.success(data = results)
         } catch (e: UnsupportedMediaType) {
             e.printStackTrace()
-            Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE)
+            Response.failed(ResultCode.UNSUPPORTED_MEDIA_TYPE, ResultCode.UNSUPPORTED_MEDIA_TYPE)
         } catch (e: Exception) {
             e.printStackTrace()
-            Response.failed(ResultCode.EXPECTATION_FAILED, ErrorCode.FILE_UPLOAD_FAIL)
+            Response.failed(ResultCode.EXPECTATION_FAILED, ResultCode.FILE_UPLOAD_FAIL)
         }
     }
 }

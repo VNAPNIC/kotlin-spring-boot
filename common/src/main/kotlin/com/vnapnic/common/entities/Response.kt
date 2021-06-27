@@ -36,7 +36,7 @@ class Response<T>(val code: Long = ResultCode.SUCCESS.code,
          * @param status error [ResultCode]
          * @param error error [ErrorCode]
          */
-        fun failed(status: ResultCode? = null, error: ErrorCode): Response<*> {
+        fun failed(status: ResultCode? = null, error: ResultCode): Response<*> {
             return Response(code = status?.code
                     ?: ResultCode.FAILED.code, message = status?.message, errorCode = error.code, error = error.message, data = null)
         }

@@ -1,11 +1,7 @@
 package com.vnapnic.auth.dto
 
-enum class VerifyType(val value: Int) {
-    PHONE_NUMBER(0),
-    EMAIL(1)
-}
-
-data class VerifyCodeRequest(
+data class SendVerifyCodeRequest(
+        val email: String?,
         val phoneNumber: String?,
         val dialCode: String?,
         val numCode: String?,
@@ -13,10 +9,10 @@ data class VerifyCodeRequest(
         val alpha3Code: String?,
         val enShortName: String?,
         val nationality: String?,
-        val VerifyType: VerifyType?,
 )
 
-data class GetVerifyCodeRequest(
+data class VerifyCodeRequest(
+        val email: String?,
         val phoneNumber: String?,
         val dialCode: String?,
         val numCode: String?,
@@ -24,5 +20,5 @@ data class GetVerifyCodeRequest(
         val alpha3Code: String?,
         val enShortName: String?,
         val nationality: String?,
-        val VerifyType: VerifyType?,
+        val verifyCode: Int?
 )
