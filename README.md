@@ -4,6 +4,29 @@
 
 https://documenter.getpostman.com/view/7083569/Tzef9hxZ
 
+## response format
+
+```json
+ {
+   "timestamp": "2021-06-28T06:10:11.786+00:00",
+   "code": 200,
+   "message": "",
+   "error": "",
+   "token": "",
+   "data": Any
+ }
+```
+
+#### public IP local
+
+```
+npm install -g localtunnel
+```
+
+```
+lt --port 8762
+```
+
 
 ### Redis
 

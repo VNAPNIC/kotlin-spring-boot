@@ -1,5 +1,6 @@
 package com.vnapnic.auth.controllers
 
+import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.vnapnic.auth.dto.GetVerifyCodeRequest
 import com.vnapnic.auth.dto.VerifyCodeRequest
@@ -8,8 +9,8 @@ import com.vnapnic.auth.exception.VerifyCodeExpireException
 import com.vnapnic.auth.exception.VerifyCodeNotCorrectException
 import com.vnapnic.auth.exception.WrongTooManyTimesException
 import com.vnapnic.auth.services.AuthService
-import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.entities.Response
+import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
 import io.swagger.annotations.ApiOperation
 import org.slf4j.LoggerFactory
@@ -53,6 +54,8 @@ class VerifyController {
             } else {
                 Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
             }
+        } catch (e: NumberParseException){
+            return Response.failed(error = ResultCode.PHONE_NUMBER_WRONG_FORMAT)
         } catch (e: Exception) {
             e.printStackTrace()
             return Response.failed(error = ResultCode.SERVER_UNKNOWN_ERROR)
