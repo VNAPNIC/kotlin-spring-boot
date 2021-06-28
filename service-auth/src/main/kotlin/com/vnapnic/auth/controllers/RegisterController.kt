@@ -1,13 +1,16 @@
 package com.vnapnic.auth.controllers
 
-import com.vnapnic.auth.services.*
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.vnapnic.auth.dto.*
+import com.vnapnic.auth.services.AuthService
+import com.vnapnic.auth.services.SequenceGeneratorService
+import com.vnapnic.common.entities.Response
+import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.exception.SequenceException
-import com.vnapnic.database.enums.Role
-import com.vnapnic.common.beans.ErrorCode
-import com.vnapnic.common.beans.Response
 import com.vnapnic.common.utils.isEmail
-import com.vnapnic.common.utils.isPhoneNumber
-import com.vnapnic.database.beans.AccountBean
+import com.vnapnic.database.entities.AccountEntity
+import com.vnapnic.database.enums.Role
+import io.swagger.annotations.ApiOperation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestBody
@@ -21,6 +24,8 @@ import java.util.*
 class RegisterController {
     private val log = LoggerFactory.getLogger(RegisterController::class.java)
 
+    val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+
     @Autowired
     lateinit var sequenceGeneratorService: SequenceGeneratorService
 
@@ -30,68 +35,67 @@ class RegisterController {
     /**
      * Staff can use account with the phone number or email
      */
-    @RequestMapping(value = ["collaborator"], method = [RequestMethod.POST])
-    fun collaboratorRegister(@RequestBody json: Map<String, String>): Response {
+    @RequestMapping(value = ["/collaborator"], method = [RequestMethod.POST])
+    @ApiOperation(
+            value = "Login with phone number",
+            response = AccountResponse::class
+    )
+
+    fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
-            val code: String? = json["code"]
-            val phoneNumber: String? = json["phoneNumber"]
-            val socialId: String? = json["socialId"]
-            val email: String? = json["email"]
-            val password: String? = json["password"]
-            // Device
-            val deviceName: String? = json["deviceName"]
-            val deviceId: String? = json["deviceId"]
-            val platform: String? = json["platform"]
 
-            log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
+            if (request == null)
+                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
 
-            if (code.isNullOrEmpty())
-                if (code?.startsWith("S") == false)
-                    return Response.failed(error = ErrorCode.CODE_NOT_CORRECT)
+            if (request.code.isNullOrEmpty())
+                return Response.failed(error = ResultCode.STAFF_CODE_IS_NULL_BLANK)
 
-            if (email.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.EMAIL_IS_NULL_BLANK)
+            if (request.email.isNullOrEmpty())
+                return Response.failed(error = ResultCode.EMAIL_IS_NULL_BLANK)
 
-            if (!email.isEmail())
-                return Response.failed(error = ErrorCode.EMAIL_WRONG_FORMAT)
+            if (!request.email.isEmail())
+                return Response.failed(error = ResultCode.EMAIL_WRONG_FORMAT)
 
-            if (phoneNumber.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
+            if (request.phoneNumber.isNullOrEmpty())
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)
 
-            if (!phoneNumber.isPhoneNumber())
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+            val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
 
-            if (password.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
+            if (!phoneUtil.isValidNumber(numberProto))
+                return Response.failed(error = ResultCode.PHONE_NUMBER_WRONG_FORMAT)
 
-            if (authService.existsByEmail(email))
-                return Response.failed(error = ErrorCode.EMAIL_IS_EXISTS)
+            if (request.password.isNullOrEmpty())
+                return Response.failed(error = ResultCode.PASSWORD_IS_NULL_BLANK)
 
-            if (authService.existsByPhoneNumber(phoneNumber))
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
+            if (authService.existsByEmail(request.email))
+                return Response.failed(error = ResultCode.EMAIL_IS_EXISTS)
+
+            if (authService.existsByPhoneNumber(request.phoneNumber))
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
 
             // create staff Id
-            val staffId = sequenceIDToStaffId(code ?: "S${Calendar.getInstance().get(Calendar.YEAR)}")
+            val staffId = sequenceIDToStaffId("${request.code}${Calendar.getInstance().get(Calendar.YEAR)}")
+            val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
 
             val dto = authService.saveAccount(staffId = staffId,
-                    phoneNumber = phoneNumber,
-                    socialId = socialId,
-                    email = email,
-                    password = password,
+                    phoneNumber = phoneInterNational,
+                    socialId = request.socialId,
+                    email = request.email,
+                    password = request.password,
                     role = Role.STAFF,
-                    deviceId = deviceId,
-                    deviceName = deviceName,
-                    platform = platform)
+                    deviceId = request.deviceId,
+                    deviceName = request.deviceName,
+                    platform = request.platform)
 
             return Response.success(data = dto)
         } catch (e: Exception) {
             e.printStackTrace()
-            return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
+            return Response.failed(error = ResultCode.SERVER_UNKNOWN_ERROR)
         }
     }
 
     private fun sequenceIDToStaffId(code: String): String {
-        val sequenceID = sequenceGeneratorService.nextSequenceId(AccountBean.SEQUENCE_NAME)
+        val sequenceID = sequenceGeneratorService.nextSequenceId(AccountEntity.SEQUENCE_NAME)
                 ?: throw SequenceException("can't create staffID")
         return when (sequenceID) {
             in 100..999 -> {
@@ -113,46 +117,46 @@ class RegisterController {
      * Customer only account is phone number
      */
     @RequestMapping(value = ["/customer"], method = [RequestMethod.POST])
-    fun customerRegister(@RequestBody json: Map<String, String>): Response {
+    @ApiOperation(
+            value = "Login with phone number",
+            response = AccountResponse::class
+    )
+    fun customerRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
-            val phoneNumber: String? = json["phoneNumber"]
-            val socialId: String? = json["socialId"]
-            val email: String? = json["email"]
-            val password: String? = json["password"]
-            // Device
-            val deviceName: String? = json["deviceName"]
-            val deviceId: String? = json["deviceId"]
-            val platform: String? = json["platform"]
+            if (request == null)
+                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
 
-            log.info(String.format("request with %s %s %s %s", phoneNumber, socialId, email, password))
+            if (request.phoneNumber.isNullOrEmpty())
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)
 
-            if (phoneNumber.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_NULL_BLANK)
+            val numberProto = phoneUtil.parse(request.phoneNumber, request.alpha2Code?.toUpperCase())
 
-            if (!phoneNumber.isPhoneNumber())
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_WRONG_FORMAT)
+            if (!phoneUtil.isValidNumber(numberProto))
+                return Response.failed(error = ResultCode.PHONE_NUMBER_WRONG_FORMAT)
 
-            if (password.isNullOrEmpty())
-                return Response.failed(error = ErrorCode.PASSWORD_IS_NULL_BLANK)
+            if (request.password.isNullOrEmpty())
+                return Response.failed(error = ResultCode.PASSWORD_IS_NULL_BLANK)
 
-            if (authService.existsByPhoneNumber(phoneNumber))
-                return Response.failed(error = ErrorCode.PHONE_NUMBER_IS_EXISTS)
+            val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+
+            if (authService.existsByPhoneNumber(phoneInterNational))
+                return Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
 
             val dto = authService.saveAccount(
                     staffId = null,
-                    phoneNumber = phoneNumber,
-                    socialId = socialId,
-                    email = email,
-                    password = password,
+                    phoneNumber = phoneInterNational,
+                    socialId = request.socialId,
+                    email = request.email,
+                    password = request.password,
                     role = Role.CUSTOMER,
-                    deviceId = deviceId,
-                    deviceName = deviceName,
-                    platform = platform)
+                    deviceId = request.deviceId,
+                    deviceName = request.deviceName,
+                    platform = request.platform)
 
             return Response.success(data = dto)
         } catch (e: Exception) {
             e.printStackTrace()
-            return Response.failed(error = ErrorCode.SERVER_UNKNOWN_ERROR)
+            return Response.failed(error = ResultCode.SERVER_UNKNOWN_ERROR)
         }
     }
 }

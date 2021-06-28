@@ -1,7 +1,7 @@
 package com.vnapnic.storage.services
 
-import com.vnapnic.database.beans.files.AvatarInfoBean
-import com.vnapnic.database.beans.files.FileInfoBean
+import com.vnapnic.database.entities.files.AvatarInfoEntity
+import com.vnapnic.database.entities.files.FileInfoEntity
 import com.vnapnic.database.storage.Storage
 import com.vnapnic.database.storage.avatarPath
 import com.vnapnic.database.storage.imagePath
@@ -11,15 +11,14 @@ import com.vnapnic.storage.repositories.FilesRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
-import java.util.*
 import kotlin.jvm.Throws
 
 interface FilesService {
     @Throws(Exception::class)
-    fun avatarFindByKeyName(key: String): AvatarInfoBean?
+    fun avatarFindByKeyName(key: String): AvatarInfoEntity?
 
     @Throws(Exception::class)
-    fun fileFindByKey(key: String): FileInfoBean?
+    fun fileFindByKey(key: String): FileInfoEntity?
 
     @Throws(Exception::class)
     fun avatarFetch(key: String): Resource?
@@ -47,10 +46,10 @@ class FilesServiceImpl : FilesService {
     lateinit var localStorage: Storage
 
     @Throws(Exception::class)
-    override fun avatarFindByKeyName(key: String): AvatarInfoBean? = avatarRepository.findByFileName(key)
+    override fun avatarFindByKeyName(key: String): AvatarInfoEntity? = avatarRepository.findByFileName(key)
 
     @Throws(Exception::class)
-    override fun fileFindByKey(key: String): FileInfoBean? = filesRepository.findByFileName(key)
+    override fun fileFindByKey(key: String): FileInfoEntity? = filesRepository.findByFileName(key)
 
     @Throws(Exception::class)
     override fun avatarFetch(key: String): Resource? {

@@ -1,9 +1,39 @@
-#App Cleaner
+## Learn Language Speaking Online
 
-###Redis
+## API Documents
+
+https://documenter.getpostman.com/view/7083569/Tzef9hxZ
+
+## response format
+
+```json
+ {
+   "timestamp": "2021-06-28T06:10:11.786+00:00",
+   "code": 200,
+   "message": "",
+   "error": "",
+   "token": "",
+   "data": Any
+ }
+```
+
+#### public IP local
+
+```
+npm install -g localtunnel
+```
+
+```
+lt --port 8762
+```
 
 
-##### Linux
+### Redis
+
+> redis-server
+
+Linux
+
 ```
 sudo apt-get update
 sudo apt-get install build-essential tcl
@@ -24,7 +54,7 @@ redis-cli info stats
 redis-cli info server
 ```
 
-##### WSL
+> WSL
 
 ```
 sudo apt update && apt upgrade
@@ -53,29 +83,64 @@ PORT: 8761
 
 ### Gateway service Zuul
 Gateway for microservies. It includes JWT and Rolebased Access.
-
-hystrix: http://localhost:8762/actuator/hystrix.stream
-
+``
 PORT: 8762
 
-### HystrixDashboard
-Provides Hystrix Dashboard to monitor services with alternate methods in case of cuircuit break.
-
-http://localhost:8763/hystrix
-
-PORT: 8763
-
 ### Auth service
-Custom Service that provides future authentication.
+Custom Service that provides feature authentication.
 
 PORT: 8871
 
+Swagger:
+
+http://localhost:8762/api/auth/swagger-ui.htm
+
+http://localhost:8762/api/auth/v2/api-docs
+
 ### User service
-Custom Service that provides future user.
+Custom Service that provides feature user.
 
 PORT: 8872
 
+Swagger:
+
+http://localhost:8762/api/user/swagger-ui.htm
+
+http://localhost:8762/api/user/v2/api-docs
+
 ### Storage service
-Custom Service that provides future files.
+Custom Service that provides feature files.
 
 PORT: 8873
+
+Swagger:
+
+http://localhost:8762/api/storage/swagger-ui.htm
+
+http://localhost:8762/api/storage/v2/api-docs
+
+### P2p service
+Custom Service that provides feature WebRtc p2p.
+
+PORT: 8874
+
+Swagger:
+
+http://localhost:8762/api/p2p/swagger-ui.htm
+
+http://localhost:8762/api/p2p/v2/api-docs
+
+* P2pController provides HTTP requests handling, model processing and view presentation;
+* Domain package includes domain model and service;
+* Web Socket based Web RTC Signalling Server is located under the Socket directory;
+
+##### API
+Method |      URI           |  Description
+ ------ | --------------------------------------------------- | ------- 
+ Get | "", "/", "/index", "/home", "/main" | main page application web entry point
+ Post | "/room" | process room selection form
+ Get | "/room/{sid}/user/{uuid}" | select a room to enter; sid - room number, uuid - user id
+ Get | "/room/{sid}/user/{uuid}/exit" | a room exit point for the user selected
+ Get | "/room/random" | generates random room number
+ Get | "/offer" | demonstrates sample SDP offer
+ Get | "/stream" | demonstrates streaming video resolution selection
