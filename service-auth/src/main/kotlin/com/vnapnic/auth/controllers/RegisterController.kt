@@ -48,7 +48,7 @@ class RegisterController {
                 return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
 
             if (request.code.isNullOrEmpty())
-                return Response.failed(error = ResultCode.CODE_NOT_CORRECT)
+                return Response.failed(error = ResultCode.STAFF_CODE_IS_NULL_BLANK)
 
             if (request.email.isNullOrEmpty())
                 return Response.failed(error = ResultCode.EMAIL_IS_NULL_BLANK)

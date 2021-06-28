@@ -26,7 +26,7 @@ enum class ResultCode(val code: Int, val message: String) {
     PHONE_NUMBER_IS_NULL_BLANK(1008, "Phone number is null or blank."),
     PHONE_NUMBER_IS_EXISTS(1009, "Phone number is exists."),
 
-    CODE_NOT_CORRECT(1010, "CODE is not correct."),
+    STAFF_CODE_IS_NULL_BLANK(1010, "Staff code is null or blank."),
 
     FILE_TOO_LARGE(1011, "File too large."),
 
