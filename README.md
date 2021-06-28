@@ -83,7 +83,7 @@ Hosts eureka server.
 
 PORT: 8761
 
-### Gateway service Zuul
+### Gateway
 Gateway for microservies. It includes JWT and Rolebased Access.
 ``
 PORT: 8762
