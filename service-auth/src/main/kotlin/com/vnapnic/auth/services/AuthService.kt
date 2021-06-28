@@ -1,16 +1,15 @@
 package com.vnapnic.auth.services
 
 import com.vnapnic.auth.controllers.RegisterController
-import com.vnapnic.auth.repositories.AccountRepository
-import com.vnapnic.auth.repositories.DeviceRepository
-import com.vnapnic.auth.repositories.LoginHistoryRepository
-import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.auth.dto.AccountResponse
 import com.vnapnic.auth.dto.VerifyType
 import com.vnapnic.auth.exception.VerifyCodeExpireException
 import com.vnapnic.auth.exception.VerifyCodeNotCorrectException
 import com.vnapnic.auth.exception.WrongTooManyTimesException
-import com.vnapnic.common.entities.ResultCode
+import com.vnapnic.auth.repositories.AccountRepository
+import com.vnapnic.auth.repositories.DeviceRepository
+import com.vnapnic.auth.repositories.LoginHistoryRepository
+import com.vnapnic.auth.repositories.UserRepository
 import com.vnapnic.common.service.RedisService
 import com.vnapnic.database.entities.AccountEntity
 import com.vnapnic.database.entities.DeviceEntity
@@ -18,13 +17,13 @@ import com.vnapnic.database.entities.LoginHistoryEntity
 import com.vnapnic.database.entities.UserEntity
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.database.enums.Role
-import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 
 interface AuthService {
 
@@ -88,7 +87,7 @@ class AuthServiceImpl : AuthService {
     lateinit var redisService: RedisService
 
     val verifyFormat = "%s_%s"
-    val verifyCountDownFormat = "%s_%s_countdown"
+    val verifyIncorrectCountFormat = "%s_%s_incorrect_count"
 
     override fun findBySocialId(socialId: String?): AccountEntity? = accountRepository.findBySocialId(socialId)
     override fun findByPhoneNumber(phoneNumber: String?): AccountEntity? = accountRepository.findByPhoneNumber(phoneNumber)
@@ -100,12 +99,12 @@ class AuthServiceImpl : AuthService {
 
     override fun sendVerifyCode(phoneNumber: String, type: VerifyType): Boolean {
         val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val verifyCountDownKey = String.format(verifyCountDownFormat, type, phoneNumber)
-
-        redisService[verifyKey] = 6782
+        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
+        val code = ThreadLocalRandom.current().nextInt(100000, 1000000)
+        redisService[verifyKey] = code
         redisService.expire(verifyKey, 30)
 
-        redisService[verifyCountDownKey] = 5
+        redisService[verifyCountDownKey] = 3
         redisService.expire(verifyCountDownKey, 30)
 
         return true
@@ -113,7 +112,7 @@ class AuthServiceImpl : AuthService {
 
     override fun getVerifyCode(phoneNumber: String, type: VerifyType): Int? {
         val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val verifyCountDownKey = String.format(verifyCountDownFormat, type, phoneNumber)
+        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
 
         log.info("type -----------------> $type")
         log.info("Expire -----------------> ${redisService.getExpire(verifyKey)}")
@@ -129,7 +128,7 @@ class AuthServiceImpl : AuthService {
                             type: VerifyType): AccountResponse? {
 
         val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val verifyCountDownKey = String.format(verifyCountDownFormat, type, phoneNumber)
+        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
 
         val verifyCode = redisService[verifyKey]
         val countDown = (redisService[verifyCountDownKey] as? Int ?: 0)

@@ -32,9 +32,9 @@ data class VerifyCodeRequest(
         val alpha3Code: String?,
         val enShortName: String?,
         val nationality: String?,
-        val verifyCode: Int?,
         val deviceName: String?,
         val deviceId: String?,
         val platform: String?,
-        val type: VerifyType
+        val type: VerifyType,
+        val verifyCode: Int?,
 )
