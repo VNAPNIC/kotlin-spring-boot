@@ -4,6 +4,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.vnapnic.auth.dto.*
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.auth.services.SequenceGeneratorService
+import com.vnapnic.common.dto.AccountResponse
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.exception.SequenceException
@@ -44,8 +45,7 @@ class RegisterController {
     fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
 
-            if (request == null)
-                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
+            if (request == null) return Response.badRequest()
 
             if (request.code.isNullOrEmpty())
                 return Response.failed(error = ResultCode.STAFF_CODE_IS_NULL_BLANK)
@@ -123,8 +123,7 @@ class RegisterController {
     )
     fun customerRegister(@RequestBody request: RegisterRequest?): Response<*> {
         try {
-            if (request == null)
-                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
+            if (request == null) return Response.badRequest()
 
             if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)

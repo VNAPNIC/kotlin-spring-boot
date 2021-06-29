@@ -2,6 +2,8 @@ package com.vnapnic.auth.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.vnapnic.database.enums.Platform
+import com.vnapnic.database.enums.Role
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -34,7 +36,8 @@ data class VerifyCodeRequest(
         val nationality: String?,
         val deviceName: String?,
         val deviceId: String?,
-        val platform: String?,
+        val platform: Platform,
         val type: VerifyType,
         val verifyCode: Int?,
+        val role: Role,
 )

@@ -12,10 +12,11 @@ enum class ResultCode(val code: Int, val message: String) {
     // Error
     SERVER_UNKNOWN_ERROR(1000, "Server unknown error."),
 
-    EMAIL_PASSWORD_NOT_CORRECT(1001, "Email/Password is not correct."),
-    SOCIAL_PASSWORD_NOT_CORRECT(1002, "Social/Password is not correct."),
+    EMAIL_PASSWORD_INCORRECT(1001, "Email/Password incorrect."),
 
-    PHONE_NUMBER_PASSWORD_NOT_CORRECT(1003, "Phone number/Password is not correct."),
+    SOCIAL_PASSWORD_INCORRECT(1002, "Social/Password incorrect."),
+
+    PHONE_NUMBER_PASSWORD_INCORRECT(1003, "Phone number/Password incorrect."),
 
     PASSWORD_IS_NULL_BLANK(1004, "Password is null or blank."),
     EMAIL_IS_NULL_BLANK(1005, "Email is null or blank."),
@@ -46,7 +47,7 @@ enum class ResultCode(val code: Int, val message: String) {
 
     VERIFY_CODE_EXPIRE(1019, "verify code expire."),
 
-    VERIFY_CODE_NOT_CORRECT(1020, "verify code is not correct."),
+    VERIFY_CODE_INCORRECT(1020, "verify code is incorrect."),
 
     WRONG_TOO_MANY_TIME(1021, "Entering a wrong too many times.")
 }

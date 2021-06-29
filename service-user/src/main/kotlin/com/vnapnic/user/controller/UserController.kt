@@ -1,5 +1,6 @@
 package com.vnapnic.user.controller
 
+import com.vnapnic.common.dto.UserResponse
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
@@ -8,7 +9,6 @@ import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
 import com.vnapnic.database.redis.JWT.ACCOUNT_ID
 import com.vnapnic.database.redis.JWT.DEVICE_ID
-import com.vnapnic.user.dto.UserResponse
 import com.vnapnic.user.services.UserService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired

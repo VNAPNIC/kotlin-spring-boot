@@ -2,7 +2,7 @@ package com.vnapnic.auth.controllers
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.vnapnic.auth.dto.AuthRequest
-import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.common.dto.AccountResponse
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.common.entities.Response
@@ -37,8 +37,7 @@ class AuthController {
     )
     fun authWithEmail(@RequestBody request: AuthRequest?): Response<*> {
         try {
-            if (request == null)
-                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
+            if (request == null) return Response.badRequest()
 
             if (request.email.isNullOrEmpty())
                 return Response.failed(error = ResultCode.EMAIL_IS_NULL_BLANK)
@@ -55,15 +54,15 @@ class AuthController {
             log.info(String.format("request with %s %s", request.email, request.password))
             // Find account with same username, check password
             if (!authService.existsByEmail(request.email))
-                return Response.failed(error = ResultCode.EMAIL_PASSWORD_NOT_CORRECT)
+                return Response.failed(error = ResultCode.EMAIL_PASSWORD_INCORRECT)
 
             // get account by email
             val rawAccount = authService.findByEmail(request.email)
-                    ?: return Response.failed(error = ResultCode.EMAIL_PASSWORD_NOT_CORRECT)
+                    ?: return Response.failed(error = ResultCode.EMAIL_PASSWORD_INCORRECT)
 
             // Validate password
             if (!authService.validatePassword(request.password, rawAccount.password))
-                return Response.failed(error = ResultCode.EMAIL_PASSWORD_NOT_CORRECT)
+                return Response.failed(error = ResultCode.EMAIL_PASSWORD_INCORRECT)
 
             // Save device
             val device = authService.saveDevice(DeviceEntity(
@@ -114,15 +113,15 @@ class AuthController {
 
             // Find account with same username, check password
             if (!authService.existsByPhoneNumber(phoneInterNational))
-                return Response.failed(error = ResultCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_PASSWORD_INCORRECT)
 
             // get account by phone number
             val rawAccount = authService.findByPhoneNumber(phoneInterNational)
-                    ?: return Response.failed(error = ResultCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
+                    ?: return Response.failed(error = ResultCode.PHONE_NUMBER_PASSWORD_INCORRECT)
 
             // Validate password
             if (!authService.validatePassword(request.password, rawAccount.password))
-                return Response.failed(error = ResultCode.PHONE_NUMBER_PASSWORD_NOT_CORRECT)
+                return Response.failed(error = ResultCode.PHONE_NUMBER_PASSWORD_INCORRECT)
 
             // Save device
             val device = authService.saveDevice(DeviceEntity(

@@ -27,8 +27,9 @@ class Response<T>(
         val status: HttpStatus = HttpStatus.OK,
         val error: String? = "",
         val token: String? = null,
-        val data: T? = null
-) : ResponseEntity<Response.CustomResponseBody>(status) {
+        val data: T? = null,
+        private val errorBody: T? = null
+) : ResponseEntity<Any>(status) {
 
     data class CustomResponseBody(
             val timestamp: String = DateTimeFormatter
@@ -39,10 +40,22 @@ class Response<T>(
             val message: String? = ResultCode.SUCCESS.message,
             val error: String? = "",
             val token: String? = null,
-            val data: Any? = null
+            val data: Any? = null,
     )
 
-    override fun getBody(): CustomResponseBody? = CustomResponseBody(timestamp, code, message, error, token, data)
+    data class CustomErrorBody(
+            val timestamp: String = DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
+                    .withZone(ZoneOffset.UTC)
+                    .format(Instant.now()),
+            val code: Int = ResultCode.SUCCESS.code,
+            val message: String? = ResultCode.SUCCESS.message,
+            val error: String? = "",
+            val token: String? = null,
+            val errorBody: Any? = null,
+    )
+
+    override fun getBody(): Any? = if (code == ResultCode.SUCCESS.code) CustomResponseBody(timestamp, code, message, error, token, data) else CustomErrorBody(timestamp, code, message, error, token, errorBody)
 
     companion object {
         /**
@@ -67,6 +80,14 @@ class Response<T>(
             return Response(message = message, token = token, data = null)
         }
 
+        fun <T> failedWithData(error: ResultCode = ResultCode.FAILED, errorBody: T?): Response<*> {
+            return Response(code = error.code,
+                    message = error.message,
+                    status = HttpStatus.OK,
+                    error = error.message,
+                    errorBody = errorBody)
+        }
+
         /**
          * Failed to return result
          * @param error error [ResultCode]
@@ -77,7 +98,17 @@ class Response<T>(
                     message = error.message,
                     status = HttpStatus.INTERNAL_SERVER_ERROR,
                     error = error.message,
-                    data = null
+                    errorBody = null
+            )
+        }
+
+        fun badRequest(error: ResultCode = ResultCode.WARNING_DATA_FORMAT): Response<*> {
+            return Response(
+                    code = error.code,
+                    message = error.message,
+                    status = HttpStatus.BAD_REQUEST,
+                    error = error.message,
+                    errorBody = null
             )
         }
 
@@ -90,7 +121,7 @@ class Response<T>(
                     message = ResultCode.UNAUTHORIZED.message,
                     status = HttpStatus.UNAUTHORIZED,
                     error = ResultCode.UNAUTHORIZED.message,
-                    data = data
+                    errorBody = data
             )
         }
 
@@ -103,7 +134,7 @@ class Response<T>(
                     message = message,
                     status = HttpStatus.UNAUTHORIZED,
                     error = message,
-                    data = data
+                    errorBody = data
             )
         }
 
@@ -116,7 +147,7 @@ class Response<T>(
                     message = ResultCode.FORBIDDEN.message,
                     status = HttpStatus.FORBIDDEN,
                     error = ResultCode.FORBIDDEN.message,
-                    data = data
+                    errorBody = data
             )
         }
     }

@@ -1,9 +1,9 @@
 package com.vnapnic.user.services
 
+import com.vnapnic.common.dto.UserResponse
 import com.vnapnic.database.entities.UserEntity
 import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
-import com.vnapnic.user.dto.UserResponse
 import com.vnapnic.user.repositories.AccountRepository
 import com.vnapnic.user.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,7 +42,7 @@ class UserServiceImpl : UserService {
         if (userId == null || !userRepository.existsById(userId))
             throw UserNotFound("User not found")
         val result = userRepository.findById(userId).get()
-        return convertUserEntityToResponse(result)
+        return UserResponse.from(result)
     }
 
     @Throws(Exception::class)
@@ -68,17 +68,6 @@ class UserServiceImpl : UserService {
         )
 
         val result = userRepository.save(user)
-        return convertUserEntityToResponse(result)
+        return UserResponse.from(result)
     }
-
-    private fun convertUserEntityToResponse(entity: UserEntity?): UserResponse = UserResponse(
-            userId = entity?.id,
-            firstName = entity?.firstName,
-            lastName = entity?.lastName,
-            weight = entity?.weight ?: 0.0,
-            height = entity?.height ?: 0.0,
-            gender = entity?.gender,
-            description = entity?.description,
-            avatar = entity?.avatar
-    )
 }

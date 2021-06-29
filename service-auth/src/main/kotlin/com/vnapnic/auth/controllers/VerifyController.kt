@@ -6,7 +6,7 @@ import com.vnapnic.auth.dto.GetVerifyCodeRequest
 import com.vnapnic.auth.dto.VerifyCodeRequest
 import com.vnapnic.auth.dto.VerifyType
 import com.vnapnic.auth.exception.VerifyCodeExpireException
-import com.vnapnic.auth.exception.VerifyCodeNotCorrectException
+import com.vnapnic.auth.exception.VerifyCodeIncorrectException
 import com.vnapnic.auth.exception.WrongTooManyTimesException
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.common.entities.Response
@@ -35,8 +35,7 @@ class VerifyController {
     @ApiOperation(value = "Get verify code")
     fun getVerifyCode(@RequestBody request: GetVerifyCodeRequest?): Response<*> {
         try {
-            if (request == null)
-                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
+            if (request == null) return Response.badRequest()
 
             if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)
@@ -50,11 +49,11 @@ class VerifyController {
             val rawAccount = authService.findByPhoneNumber(phoneInterNational)
             return if (rawAccount == null || !rawAccount.phoneVerified) {
                 authService.sendVerifyCode(phoneInterNational, request.type)
-                Response.success()
+                Response.success(data = phoneInterNational)
             } else {
                 Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
             }
-        } catch (e: NumberParseException){
+        } catch (e: NumberParseException) {
             return Response.failed(error = ResultCode.PHONE_NUMBER_WRONG_FORMAT)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -66,11 +65,7 @@ class VerifyController {
     @ApiOperation(value = "verify code")
     fun verifyCode(@RequestBody request: VerifyCodeRequest?): Response<*> {
         try {
-            if (request == null)
-                return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)
-
-            if (request.verifyCode == null || request.verifyCode < 1000 || request.verifyCode > 9999)
-                return Response.failed(error = ResultCode.VERIFY_CODE_NOT_CORRECT)
+            if (request == null) return Response.badRequest()
 
             if (request.phoneNumber.isNullOrEmpty())
                 return Response.failed(error = ResultCode.PHONE_NUMBER_IS_NULL_BLANK)
@@ -84,7 +79,15 @@ class VerifyController {
             val rawAccount = authService.findByPhoneNumber(phoneInterNational)
 
             return if (rawAccount == null || !rawAccount.phoneVerified) {
-                val account = authService.verifyCode(phoneInterNational, request.verifyCode, request.deviceId, request.deviceName, request.platform, request.type)
+                val account = authService.verifyCode(
+                        phoneInterNational,
+                        request.verifyCode,
+                        request.deviceId,
+                        request.deviceName,
+                        request.platform,
+                        request.type,
+                        request.role
+                )
                         ?: return Response.failed(error = ResultCode.SERVER_UNKNOWN_ERROR)
 
                 log.info(account.toString())
@@ -95,8 +98,8 @@ class VerifyController {
             } else {
                 Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
             }
-        } catch (e: VerifyCodeNotCorrectException) {
-            return Response.failed(error = ResultCode.VERIFY_CODE_NOT_CORRECT)
+        } catch (e: VerifyCodeIncorrectException) {
+            return Response.failedWithData(error = ResultCode.VERIFY_CODE_INCORRECT, errorBody = e.incorrectCount)
         } catch (e: VerifyCodeExpireException) {
             return Response.failed(error = ResultCode.VERIFY_CODE_EXPIRE)
         } catch (e: WrongTooManyTimesException) {

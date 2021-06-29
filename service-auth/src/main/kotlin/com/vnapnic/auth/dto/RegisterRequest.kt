@@ -1,5 +1,7 @@
 package com.vnapnic.auth.dto
 
+import com.vnapnic.database.enums.Platform
+
 data class RegisterRequest(
         val code: String?,
         // Phone
@@ -16,5 +18,5 @@ data class RegisterRequest(
         val password: String?,
         val deviceName: String?,
         val deviceId: String?,
-        val platform: String?
+        val platform: Platform
 )

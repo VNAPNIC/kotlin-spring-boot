@@ -1,10 +1,10 @@
 package com.vnapnic.auth.services
 
 import com.vnapnic.auth.controllers.RegisterController
-import com.vnapnic.auth.dto.AccountResponse
+import com.vnapnic.common.dto.AccountResponse
 import com.vnapnic.auth.dto.VerifyType
 import com.vnapnic.auth.exception.VerifyCodeExpireException
-import com.vnapnic.auth.exception.VerifyCodeNotCorrectException
+import com.vnapnic.auth.exception.VerifyCodeIncorrectException
 import com.vnapnic.auth.exception.WrongTooManyTimesException
 import com.vnapnic.auth.repositories.AccountRepository
 import com.vnapnic.auth.repositories.DeviceRepository
@@ -40,11 +40,12 @@ interface AuthService {
     fun getVerifyCode(phoneNumber: String, type: VerifyType): Int?
 
     fun verifyCode(phoneNumber: String,
-                   code: Int,
+                   code: Int?,
                    deviceId: String?,
                    deviceName: String?,
-                   platform: String?,
-                   type: VerifyType): AccountResponse?
+                   platform: Platform = Platform.OTHER,
+                   type: VerifyType,
+                   role: Role): AccountResponse?
 
     fun saveAccount(staffId: String? = null,
                     phoneNumber: String? = null,
@@ -54,7 +55,7 @@ interface AuthService {
                     role: Role? = null,
                     deviceId: String? = null,
                     deviceName: String? = null,
-                    platform: String? = null): AccountResponse?
+                    platform: Platform = Platform.OTHER): AccountResponse?
 
     fun saveDevice(device: DeviceEntity): DeviceEntity?
 
@@ -121,35 +122,39 @@ class AuthServiceImpl : AuthService {
     }
 
     override fun verifyCode(phoneNumber: String,
-                            code: Int,
+                            code: Int?,
                             deviceId: String?,
                             deviceName: String?,
-                            platform: String?,
-                            type: VerifyType): AccountResponse? {
+                            platform: Platform,
+                            type: VerifyType,
+                            role: Role): AccountResponse? {
 
         val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
+        val incorrectCountKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
 
         val verifyCode = redisService[verifyKey]
-        val countDown = (redisService[verifyCountDownKey] as? Int ?: 0)
+        var incorrectCount = (redisService[incorrectCountKey] as? Int ?: 0)
 
         if ((redisService.getExpire(verifyKey) ?: -2) <= 0L)
             throw VerifyCodeExpireException()
 
-        if (countDown <= 0)
-            throw WrongTooManyTimesException()
+        if (verifyCode != code || code == null || code < 100000 || code > 999999) {
+            incorrectCount--
+            redisService[incorrectCountKey] = incorrectCount
+            log.info("CountDown -----------------> $incorrectCount")
 
-        if (verifyCode != code) {
-            redisService[verifyCountDownKey] = countDown - 1
-            throw VerifyCodeNotCorrectException()
+            if (incorrectCount <= 0)
+                throw WrongTooManyTimesException()
+
+            throw VerifyCodeIncorrectException(redisService[incorrectCountKey] as? Int ?: 3)
         }
 
         val result = findByPhoneNumber(phoneNumber)
 
         val account: AccountResponse? = if (result != null)
-            convertAccountEntityToResponse(result)
+            AccountResponse.from(result)
         else
-            saveAccount(phoneNumber = phoneNumber, deviceId = deviceId, deviceName = deviceName, platform = platform)
+            saveAccount(phoneNumber = phoneNumber, deviceId = deviceId, deviceName = deviceName, platform = platform, role = role)
 
         return verifyPhoneNumber(account?.id)
     }
@@ -162,7 +167,7 @@ class AuthServiceImpl : AuthService {
                              role: Role?,
                              deviceId: String?,
                              deviceName: String?,
-                             platform: String?): AccountResponse? {
+                             platform: Platform): AccountResponse? {
 
         // create and save device
         val devices = arrayListOf<DeviceEntity?>()
@@ -170,7 +175,7 @@ class AuthServiceImpl : AuthService {
         val device = saveDevice(DeviceEntity(
                 deviceId = deviceId,
                 deviceName = deviceName,
-                platform = Platform.valueOf(platform ?: "")))
+                platform = platform))
 
         devices.add(device)
 
@@ -190,7 +195,7 @@ class AuthServiceImpl : AuthService {
         ))
 
         // return dto
-        return convertAccountEntityToResponse(result)
+        return AccountResponse.from(result)
     }
 
     override fun saveDevice(device: DeviceEntity): DeviceEntity? = deviceRepository.save(device)
@@ -207,7 +212,7 @@ class AuthServiceImpl : AuthService {
         ))
 
         // return dto
-        return convertAccountEntityToResponse(result)
+        return AccountResponse.from(result)
     }
 
     override fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean = passwordEncoder.matches(rawPassword, encodedPassword)
@@ -222,7 +227,7 @@ class AuthServiceImpl : AuthService {
         account.phoneVerifiedTime = Date.from(Instant.now())
 
         val result = accountRepository.save(account)
-        return convertAccountEntityToResponse(result)
+        return AccountResponse.from(result)
     }
 
     private fun verifyEmail(accountId: String?): AccountResponse? {
@@ -234,25 +239,6 @@ class AuthServiceImpl : AuthService {
         account.emailVerifiedTime = Date.from(Instant.now())
 
         val result = accountRepository.save(account)
-        return convertAccountEntityToResponse(result)
+        return AccountResponse.from(result)
     }
-
-    private fun convertAccountEntityToResponse(entity: AccountEntity?): AccountResponse? = AccountResponse(
-            id = entity?.id,
-            socialId = entity?.socialId,
-            email = entity?.email,
-            phoneNumber = entity?.phoneNumber,
-            active = entity?.active,
-
-            emailVerified = entity?.emailVerified,
-            phoneVerified = entity?.phoneVerified,
-
-            registerTime = entity?.registerTime,
-            emailVerifiedTime = entity?.emailVerifiedTime,
-            phoneVerifiedTime = entity?.phoneVerifiedTime,
-
-            collaboratorId = entity?.collaboratorId,
-            role = entity?.role,
-            user = entity?.info
-    )
 }
