@@ -5,3 +5,17 @@ spring:
     active: dev
   application:
     name: auth-service
+
+zuul:
+  ignored-services: '*'
+  routes:
+    auth-service:
+      path: /auth/**
+      serviceId: auth-service
+      url: http://localhost:${server.port}
+  host:
+    time-to-live: -1
+    connect-timeout-millis: 5000
+    max-per-route-connections: 10000
+    max-total-connections: 5000
+    socket-timeout-millis: 60000

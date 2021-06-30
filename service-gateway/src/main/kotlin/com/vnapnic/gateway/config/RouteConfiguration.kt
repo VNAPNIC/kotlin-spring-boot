@@ -13,28 +13,28 @@ class RouteConfiguration {
     fun initRouteConfiguration(builder: RouteLocatorBuilder): RouteLocator {
         return builder.routes()
                 .route { rs ->
-                    rs.path("/api/auth/**")
-                            .filters { f -> f.rewritePath("^/api/auth", "") }
+                    rs.path("/api/**")
+                            .filters { f -> f.rewritePath("^/api", "") }
                             .uri("lb://AUTH-SERVICE/")
                 }
                 .route { rs: PredicateSpec ->
-                    rs.path("/api/storage/**")
-                            .filters { f -> f.rewritePath("^/api/storage", "") }
+                    rs.path("/api/**")
+                            .filters { f -> f.rewritePath("^/api", "") }
                             .uri("lb://STORAGE-SERVICE/")
                 }
                 .route { rs ->
-                    rs.path("/api/user/**")
-                            .filters { f -> f.rewritePath("^/api/user", "") }
+                    rs.path("/api/**")
+                            .filters { f -> f.rewritePath("^/api", "") }
                             .uri("lb://USER-SERVICE/")
                 }
                 .route { rs ->
-                    rs.path("/api/p2p/**")
-                            .filters { f -> f.rewritePath("^/api/p2p", "") }
+                    rs.path("/api/**")
+                            .filters { f -> f.rewritePath("^/api", "") }
                             .uri("lb://P2P-SERVICE/")
                 }
                 .route { rs ->
-                    rs.path("/ws/p2p/**")
-                            .filters { f -> f.rewritePath("^/ws/p2p", "") }
+                    rs.path("/ws/**")
+                            .filters { f -> f.rewritePath("^/ws", "") }
                             .uri("lb:ws://P2P-SERVICE/")
                 }
                 .build()

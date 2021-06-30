@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @RestController
-@RequestMapping
+@RequestMapping("/verify")
 class VerifyController {
     private val log = LoggerFactory.getLogger(RegisterController::class.java)
 
@@ -31,7 +31,7 @@ class VerifyController {
     @Autowired
     lateinit var jwtService: JWTService
 
-    @RequestMapping(value = ["/getVerifyCode"], method = [RequestMethod.POST])
+    @RequestMapping(value = ["/phone"], method = [RequestMethod.POST])
     @ApiOperation(value = "Get verify code")
     fun getVerifyCode(@RequestBody request: GetVerifyCodeRequest?): Response<*> {
         try {
@@ -61,7 +61,7 @@ class VerifyController {
         }
     }
 
-    @RequestMapping(value = ["/verify"], method = [RequestMethod.POST])
+    @RequestMapping(value = ["/code"], method = [RequestMethod.POST])
     @ApiOperation(value = "verify code")
     fun verifyCode(@RequestBody request: VerifyCodeRequest?): Response<*> {
         try {
@@ -110,7 +110,7 @@ class VerifyController {
         }
     }
 
-    @RequestMapping(value = ["/verify"], method = [RequestMethod.GET])
+    @RequestMapping(value = ["/code"], method = [RequestMethod.GET])
     @ApiOperation(value = "Get verify code")
     fun getVerifyCode(@RequestParam(name = "phoneNumber") phoneNumber: String?,
                       @RequestParam(name = "alpha2Code") alpha2Code: String,

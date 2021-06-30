@@ -5,3 +5,17 @@ spring:
     active: dev
   application:
     name: p2p-service
+
+zuul:
+  ignored-services: '*'
+  routes:
+    p2p-service:
+      path: /p2p/**
+      serviceId: p2p-service
+      url: http://localhost:${server.port}
+  host:
+    time-to-live: -1
+    connect-timeout-millis: 5000
+    max-per-route-connections: 10000
+    max-total-connections: 5000
+    socket-timeout-millis: 60000
