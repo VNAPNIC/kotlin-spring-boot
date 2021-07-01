@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/verify")
 class VerifyController {
-    private val log = LoggerFactory.getLogger(RegisterController::class.java)
+    private val log = LoggerFactory.getLogger(SignUpController::class.java)
 
     val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 

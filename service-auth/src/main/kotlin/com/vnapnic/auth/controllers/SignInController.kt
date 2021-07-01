@@ -1,7 +1,7 @@
 package com.vnapnic.auth.controllers
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.vnapnic.auth.dto.AuthRequest
+import com.vnapnic.auth.dto.SignInRequest
 import com.vnapnic.common.dto.AccountResponse
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.database.enums.Platform
@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*
 @Api(value = "/login", description = "Provider api authentication")
 @RestController
 @RequestMapping("/login")
-class AuthController {
-    private val log = LoggerFactory.getLogger(AuthController::class.java)
+class SignInController {
+    private val log = LoggerFactory.getLogger(SignInController::class.java)
 
     val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 
@@ -35,7 +35,7 @@ class AuthController {
             value = "Login with email",
             response  = AccountResponse::class,
     )
-    fun authWithEmail(@RequestBody request: AuthRequest?): Response<*> {
+    fun authWithEmail(@RequestBody request: SignInRequest?): Response<*> {
         try {
             if (request == null) return Response.badRequest()
 
@@ -90,7 +90,7 @@ class AuthController {
             value = "Login with phone number",
             response = AccountResponse::class
     )
-    fun authWithPhoneNumber(@RequestBody request: AuthRequest?): Response<*> {
+    fun authWithPhoneNumber(@RequestBody request: SignInRequest?): Response<*> {
         try {
             if (request == null)
                 return Response.failed(error = ResultCode.WARNING_DATA_FORMAT)

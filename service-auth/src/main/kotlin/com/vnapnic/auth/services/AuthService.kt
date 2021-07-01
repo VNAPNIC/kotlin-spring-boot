@@ -1,6 +1,6 @@
 package com.vnapnic.auth.services
 
-import com.vnapnic.auth.controllers.RegisterController
+import com.vnapnic.auth.controllers.SignUpController
 import com.vnapnic.common.dto.AccountResponse
 import com.vnapnic.auth.dto.VerifyType
 import com.vnapnic.auth.exception.VerifyCodeExpireException
@@ -60,6 +60,7 @@ interface AuthService {
     fun saveDevice(device: DeviceEntity): DeviceEntity?
 
     fun login(account: AccountEntity): AccountResponse?
+    fun logout(accountId: String)
 
     fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean
     fun encryptPassword(password: String?): String?
@@ -67,7 +68,7 @@ interface AuthService {
 
 @Service
 class AuthServiceImpl : AuthService {
-    private val log = LoggerFactory.getLogger(RegisterController::class.java)
+    private val log = LoggerFactory.getLogger(SignUpController::class.java)
 
     @Autowired
     lateinit var accountRepository: AccountRepository
@@ -113,11 +114,6 @@ class AuthServiceImpl : AuthService {
 
     override fun getVerifyCode(phoneNumber: String, type: VerifyType): Int? {
         val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
-
-        log.info("type -----------------> $type")
-        log.info("Expire -----------------> ${redisService.getExpire(verifyKey)}")
-        log.info("CountDown -----------------> ${redisService[verifyCountDownKey]}")
         return redisService[verifyKey] as? Int
     }
 
@@ -141,8 +137,6 @@ class AuthServiceImpl : AuthService {
         if (verifyCode != code || code == null || code < 100000 || code > 999999) {
             incorrectCount--
             redisService[incorrectCountKey] = incorrectCount
-            log.info("CountDown -----------------> $incorrectCount")
-
             if (incorrectCount <= 0)
                 throw WrongTooManyTimesException()
 
@@ -202,6 +196,7 @@ class AuthServiceImpl : AuthService {
 
     override fun login(account: AccountEntity): AccountResponse? {
 
+        account.active = true
         val result = accountRepository.save(account)
 
         // insert login history
@@ -213,6 +208,12 @@ class AuthServiceImpl : AuthService {
 
         // return dto
         return AccountResponse.from(result)
+    }
+
+    override fun logout(accountId: String){
+        val result = accountRepository.findById(accountId).get()
+        result.active = false
+        accountRepository.save(result)
     }
 
     override fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean = passwordEncoder.matches(rawPassword, encodedPassword)

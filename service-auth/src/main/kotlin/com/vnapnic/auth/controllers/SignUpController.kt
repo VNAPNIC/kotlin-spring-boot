@@ -22,8 +22,8 @@ import java.util.*
 
 @RestController
 @RequestMapping("/register")
-class RegisterController {
-    private val log = LoggerFactory.getLogger(RegisterController::class.java)
+class SignUpController {
+    private val log = LoggerFactory.getLogger(SignUpController::class.java)
 
     val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 
@@ -41,8 +41,7 @@ class RegisterController {
             value = "Login with phone number",
             response = AccountResponse::class
     )
-
-    fun collaboratorRegister(@RequestBody request: RegisterRequest?): Response<*> {
+    fun collaboratorRegister(@RequestBody request: SignUpRequest?): Response<*> {
         try {
 
             if (request == null) return Response.badRequest()
@@ -121,7 +120,7 @@ class RegisterController {
             value = "Login with phone number",
             response = AccountResponse::class
     )
-    fun customerRegister(@RequestBody request: RegisterRequest?): Response<*> {
+    fun customerRegister(@RequestBody request: SignUpRequest?): Response<*> {
         try {
             if (request == null) return Response.badRequest()
 

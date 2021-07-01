@@ -19,6 +19,7 @@ import com.vnapnic.database.redis.JWT.REDIS_JWT_DEVICE_ID
 interface JWTService {
     fun generateJWT(accountId: String?, deviceId: String?): String?
     fun parseJWT(token: String?): Map<String, String>?
+    fun removeToken(token: String?)
 }
 
 open class JWTServiceImpl : JWTService {
@@ -49,7 +50,6 @@ open class JWTServiceImpl : JWTService {
         val redisJwtDeviceKey = "$REDIS_JWT_DEVICE_ID:$jwtId"
         val redisJwtAccountKey = "$REDIS_JWT_ACCOUNT_ID:$jwtId"
 
-        val subject = "$accountId&$deviceId"
         val map = HashMap<String, Any>()
         map[ACCOUNT_ID] = accountId
         map[DEVICE_ID] = deviceId
@@ -58,7 +58,6 @@ open class JWTServiceImpl : JWTService {
         val jwt = Jwts.builder()
                 .setId(jwtId)
                 .setIssuedAt(now)
-                .setSubject(subject)
                 .setExpiration(Date(nowMillis + property.jwtTTL))
                 .setIssuer(property.jwtIssuer)
                 .setHeaderParam("Authorization", "JWT")
@@ -86,9 +85,7 @@ open class JWTServiceImpl : JWTService {
 
     override fun parseJWT(token: String?): Map<String, String>? {
 
-        if (token == null){
-            throw AuthenticationException("Token is null or empty.")
-        }
+        if (token == null) throw AuthenticationException("Token is null or empty.")
 
         //This line will throw an exception if it is not a signed JWS (as expected)
         val jwsClaims = Jwts.parser()
@@ -97,13 +94,15 @@ open class JWTServiceImpl : JWTService {
 
         if (jwsClaims.header.getAlgorithm() != SignatureAlgorithm.HS256.value)
             throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
+
         val claims = jwsClaims.body
 
         // Find record from redis
         val record: String? = redisService["$REDIS_JWT:${claims.id}"] as? String
-        if (record == null || token != record) {
+
+        if (record == null || token != record)
             throw AuthenticationException("Token is expired.")
-        }
+
         val maps = mutableMapOf<String, String>()
         maps[ACCOUNT_ID] = redisService["$REDIS_JWT_ACCOUNT_ID:${claims.id}"] as? String
                 ?: throw AuthenticationException("can't find account id")
@@ -111,5 +110,27 @@ open class JWTServiceImpl : JWTService {
                 ?: throw AuthenticationException("can't find account id")
 
         return maps
+    }
+
+    override fun removeToken(token: String?) {
+        if (token == null) throw AuthenticationException("Token is null or empty.")
+
+        val jwsClaims = Jwts.parser()
+                .setSigningKey(DatatypeConverter.parseBase64Binary(property.jwtPhase))
+                .parseClaimsJws(token)
+
+        if (jwsClaims.header.getAlgorithm() != SignatureAlgorithm.HS256.value)
+            throw AuthenticationException("Invalid JWT token." + jwsClaims.header.getAlgorithm())
+        val claims = jwsClaims.body
+
+        val redisJwtIdKey = "$REDIS_JWT_ID:${claims.id}"
+        val redisJwtKey = "$REDIS_JWT:${claims.id}"
+        val redisJwtDeviceKey = "$REDIS_JWT_DEVICE_ID:${claims.id}"
+        val redisJwtAccountKey = "$REDIS_JWT_ACCOUNT_ID:${claims.id}"
+
+        redisService.del(redisJwtIdKey)
+        redisService.del(redisJwtKey)
+        redisService.del(redisJwtDeviceKey)
+        redisService.del(redisJwtAccountKey)
     }
 }

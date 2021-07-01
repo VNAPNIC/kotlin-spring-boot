@@ -7,15 +7,27 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 /**
- * the response format
+ *
+ * The response successfully format
  * {
  *  "timestamp": "2021-06-28T06:10:11.786+00:00",
  *  "code": 200,
  *  "message": "",
  *  "error": "",
  *  "token": "",
+ *  "refreshToken": "",
  *  "data": Any
  * }
+ *
+ * The response failed format
+ * {
+ *  "timestamp": "2021-06-28T06:10:11.786+00:00",
+ *  "code": 200,
+ *  "message": "",
+ *  "error": "",
+ *  "errorBody": Any
+ * }
+ *
  */
 class Response<T>(
         private val timestamp: String = DateTimeFormatter
@@ -27,8 +39,8 @@ class Response<T>(
         val status: HttpStatus = HttpStatus.OK,
         val error: String? = "",
         val token: String? = null,
-        val data: T? = null,
-        private val errorBody: T? = null
+        val refreshToken: String? = null,
+        val data: T? = null
 ) : ResponseEntity<Any>(status) {
 
     data class CustomResponseBody(
@@ -40,6 +52,7 @@ class Response<T>(
             val message: String? = ResultCode.SUCCESS.message,
             val error: String? = "",
             val token: String? = null,
+            val refreshToken: String? = null,
             val data: Any? = null,
     )
 
@@ -51,11 +64,13 @@ class Response<T>(
             val code: Int = ResultCode.SUCCESS.code,
             val message: String? = ResultCode.SUCCESS.message,
             val error: String? = "",
-            val token: String? = null,
             val errorBody: Any? = null,
     )
 
-    override fun getBody(): Any? = if (code == ResultCode.SUCCESS.code) CustomResponseBody(timestamp, code, message, error, token, data) else CustomErrorBody(timestamp, code, message, error, token, errorBody)
+    override fun getBody(): Any? = if (code == ResultCode.SUCCESS.code)
+        CustomResponseBody(timestamp, code, message, error, token, refreshToken, data)
+    else
+        CustomErrorBody(timestamp, code, message, error, data)
 
     companion object {
         /**
@@ -83,9 +98,9 @@ class Response<T>(
         fun <T> failedWithData(error: ResultCode = ResultCode.FAILED, errorBody: T?): Response<*> {
             return Response(code = error.code,
                     message = error.message,
-                    status = HttpStatus.OK,
+                    status = HttpStatus.PRECONDITION_FAILED,
                     error = error.message,
-                    errorBody = errorBody)
+                    data = errorBody)
         }
 
         /**
@@ -96,9 +111,9 @@ class Response<T>(
             return Response(
                     code = error.code,
                     message = error.message,
-                    status = HttpStatus.INTERNAL_SERVER_ERROR,
+                    status = HttpStatus.PRECONDITION_FAILED,
                     error = error.message,
-                    errorBody = null
+                    data = null
             )
         }
 
@@ -108,7 +123,7 @@ class Response<T>(
                     message = error.message,
                     status = HttpStatus.BAD_REQUEST,
                     error = error.message,
-                    errorBody = null
+                    data = null
             )
         }
 
@@ -121,7 +136,7 @@ class Response<T>(
                     message = ResultCode.UNAUTHORIZED.message,
                     status = HttpStatus.UNAUTHORIZED,
                     error = ResultCode.UNAUTHORIZED.message,
-                    errorBody = data
+                    data = data
             )
         }
 
@@ -134,7 +149,7 @@ class Response<T>(
                     message = message,
                     status = HttpStatus.UNAUTHORIZED,
                     error = message,
-                    errorBody = data
+                    data = data
             )
         }
 
@@ -147,7 +162,7 @@ class Response<T>(
                     message = ResultCode.FORBIDDEN.message,
                     status = HttpStatus.FORBIDDEN,
                     error = ResultCode.FORBIDDEN.message,
-                    errorBody = data
+                    data = data
             )
         }
     }

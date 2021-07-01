@@ -1,6 +1,6 @@
 package com.vnapnic.auth.dto
 
-class AuthRequest(
+class SignInRequest(
         val email: String?,
 
         val phoneNumber: String?,

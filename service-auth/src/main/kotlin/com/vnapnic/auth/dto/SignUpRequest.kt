@@ -2,7 +2,7 @@ package com.vnapnic.auth.dto
 
 import com.vnapnic.database.enums.Platform
 
-data class RegisterRequest(
+data class SignUpRequest(
         val code: String?,
         // Phone
         val phoneNumber: String?,
