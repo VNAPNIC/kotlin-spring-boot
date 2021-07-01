@@ -3,8 +3,8 @@ package com.vnapnic.user.controller
 import com.vnapnic.common.dto.UserResponse
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
+import com.vnapnic.common.exception.toToken
 import com.vnapnic.common.service.JWTService
-import com.vnapnic.common.utils.JWTUtils
 import com.vnapnic.database.enums.Gender
 import com.vnapnic.database.exception.UserNotFound
 import com.vnapnic.database.redis.JWT.ACCOUNT_ID
@@ -38,7 +38,7 @@ class UserController {
             @RequestHeader headers: MultiValueMap<String, String>,
             @RequestBody json: Map<String, String>): Response<*> {
         try {
-            val acceptToken = JWTUtils.tokenFromBearerToken(headers["authorization"]?.get(0))
+            val acceptToken = headers["authorization"]?.get(0)?.toToken()
             val claims = jwtService.parseJWT(acceptToken)
             val accountId = claims?.get(ACCOUNT_ID)
             val deviceId = claims?.get(DEVICE_ID)

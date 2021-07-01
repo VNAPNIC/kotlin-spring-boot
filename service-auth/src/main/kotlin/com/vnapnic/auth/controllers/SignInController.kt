@@ -48,7 +48,7 @@ class SignInController {
             if (request.password.isNullOrEmpty())
                 return Response.failed(error = ResultCode.PASSWORD_IS_NULL_BLANK)
 
-            if (request.deviceId.isNullOrEmpty() || request.deviceName.isNullOrEmpty() || request.platform.isNullOrEmpty())
+            if (request.deviceId.isNullOrEmpty() || request.deviceName.isNullOrEmpty())
                 return Response.failed(error = ResultCode.UNSUPPORTED_DEVICE)
 
             log.info(String.format("request with %s %s", request.email, request.password))
@@ -68,7 +68,7 @@ class SignInController {
             val device = authService.saveDevice(DeviceEntity(
                     deviceId = request.deviceId,
                     deviceName = request.deviceName,
-                    platform = Platform.valueOf(request.platform)
+                    platform = request.platform
             ))
 
             // Update device after login
@@ -106,7 +106,7 @@ class SignInController {
             if (request.password.isNullOrEmpty())
                 return Response.failed(error = ResultCode.PASSWORD_IS_NULL_BLANK)
 
-            if (request.deviceId.isNullOrEmpty() || request.deviceName.isNullOrEmpty() || request.platform.isNullOrEmpty())
+            if (request.deviceId.isNullOrEmpty() || request.deviceName.isNullOrEmpty())
                 return Response.failed(error = ResultCode.UNSUPPORTED_DEVICE)
 
             val phoneInterNational = phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
@@ -127,7 +127,7 @@ class SignInController {
             val device = authService.saveDevice(DeviceEntity(
                     deviceId = request.deviceId,
                     deviceName = request.deviceName,
-                    platform = Platform.valueOf(request.platform)
+                    platform = request.platform
             ))
 
             // Update device after login

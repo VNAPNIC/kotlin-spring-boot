@@ -4,8 +4,8 @@ import com.vnapnic.auth.dto.SignOutRequest
 import com.vnapnic.auth.services.AuthService
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
+import com.vnapnic.common.exception.toToken
 import com.vnapnic.common.service.JWTService
-import com.vnapnic.common.utils.JWTUtils
 import com.vnapnic.database.redis.JWT
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.MultiValueMap
@@ -24,7 +24,7 @@ class SignOutController {
     @RequestMapping(value = ["/logout"], method = [RequestMethod.POST])
     fun logout(@RequestHeader headers: MultiValueMap<String, String>, @RequestBody request: SignOutRequest?): Response<*> {
         try {
-            val acceptToken = JWTUtils.tokenFromBearerToken(headers["authorization"]?.get(0))
+            val acceptToken = headers["authorization"]?.get(0)?.toToken()
             val claims = jwtService.parseJWT(acceptToken)
             val accountId = claims?.get(JWT.ACCOUNT_ID)
             val deviceId = claims?.get(JWT.DEVICE_ID)

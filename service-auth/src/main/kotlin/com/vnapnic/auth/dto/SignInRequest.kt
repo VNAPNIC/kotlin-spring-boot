@@ -1,5 +1,7 @@
 package com.vnapnic.auth.dto
 
+import com.vnapnic.database.enums.Platform
+
 class SignInRequest(
         val email: String?,
 
@@ -14,5 +16,5 @@ class SignInRequest(
         val password: String?,
         val deviceName: String?,
         val deviceId: String?,
-        val platform: String?
+        val platform: Platform
 )
