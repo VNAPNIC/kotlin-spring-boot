@@ -16,7 +16,7 @@ enum class ResultCode(val code: Int, val message: String) {
 
     SOCIAL_PASSWORD_INCORRECT(1002, "Social/Password incorrect."),
 
-    PHONE_NUMBER_PASSWORD_INCORRECT(1003, "Phone number/Password incorrect."),
+    PHONE_NUMBER_NOT_EXISTS(1003, "Phone number not exists."),
 
     PASSWORD_IS_NULL_BLANK(1004, "Password is null or blank."),
     EMAIL_IS_NULL_BLANK(1005, "Email is null or blank."),

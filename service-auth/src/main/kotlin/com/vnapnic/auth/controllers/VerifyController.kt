@@ -93,7 +93,6 @@ class VerifyController {
                 log.info(account.toString())
 
                 val jwt = jwtService.generateJWT(account.id, request.deviceId)
-
                 Response.success(data = account, token = jwt)
             } else {
                 Response.failed(error = ResultCode.PHONE_NUMBER_IS_EXISTS)
