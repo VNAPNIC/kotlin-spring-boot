@@ -2,7 +2,7 @@ package com.vnapnic.auth.services
 
 import com.vnapnic.auth.controllers.SignUpController
 import com.vnapnic.common.dto.AccountResponse
-import com.vnapnic.auth.dto.VerifyType
+import com.vnapnic.auth.dto.VerifyTypeCode
 import com.vnapnic.auth.exception.VerifyCodeExpireException
 import com.vnapnic.auth.exception.VerifyCodeIncorrectException
 import com.vnapnic.auth.exception.WrongTooManyTimesException
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.collections.ArrayList
 
 interface AuthService {
 
@@ -35,17 +36,38 @@ interface AuthService {
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean
 
-    fun sendVerifyCode(phoneNumber: String, type: VerifyType): Boolean
+    /**
+     * Send verify code to client
+     */
+    fun sendVerifyCode(phoneNumber: String, typeCode: VerifyTypeCode): Boolean
 
-    fun getVerifyCode(phoneNumber: String, type: VerifyType): Int?
+    /**
+     * get verify code with the phone number
+     */
+    fun getVerifyCode(phoneNumber: String, typeCode: VerifyTypeCode): Int?
 
-    fun verifyCode(phoneNumber: String,
-                   code: Int?,
-                   deviceId: String?,
-                   deviceName: String?,
-                   platform: Platform = Platform.OTHER,
-                   type: VerifyType,
-                   role: Role): AccountResponse?
+    /**
+     * Check registration verification code of the client
+     * If the phone number does not exist, create a new one
+     */
+    fun registrationVerification(phoneNumber: String,
+                                 code: Int?,
+                                 deviceId: String?,
+                                 deviceName: String?,
+                                 platform: Platform = Platform.OTHER,
+                                 typeCode: VerifyTypeCode,
+                                 role: Role): AccountResponse?
+
+    /**
+     * Check login verification code of the client
+     */
+    fun loginVerification(phoneNumber: String,
+                          code: Int?,
+                          deviceId: String?,
+                          deviceName: String?,
+                          platform: Platform = Platform.OTHER,
+                          typeCode: VerifyTypeCode,
+                          role: Role): AccountResponse?
 
     fun saveAccount(staffId: String? = null,
                     phoneNumber: String? = null,
@@ -57,7 +79,7 @@ interface AuthService {
                     deviceName: String? = null,
                     platform: Platform = Platform.OTHER): AccountResponse?
 
-    fun saveDevice(device: DeviceEntity): DeviceEntity?
+    fun saveDeviceInfo(device: DeviceEntity): DeviceEntity?
 
     fun login(account: AccountEntity): AccountResponse?
     fun logout(accountId: String)
@@ -99,9 +121,9 @@ class AuthServiceImpl : AuthService {
     override fun existsByEmail(email: String): Boolean = accountRepository.existsByEmail(email)
     override fun existsByPhoneNumber(phoneNumber: String): Boolean = accountRepository.existsByPhoneNumber(phoneNumber)
 
-    override fun sendVerifyCode(phoneNumber: String, type: VerifyType): Boolean {
-        val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
+    override fun sendVerifyCode(phoneNumber: String, typeCode: VerifyTypeCode): Boolean {
+        val verifyKey = String.format(verifyFormat, typeCode, phoneNumber)
+        val verifyCountDownKey = String.format(verifyIncorrectCountFormat, typeCode, phoneNumber)
         val code = ThreadLocalRandom.current().nextInt(100000, 1000000)
         redisService[verifyKey] = code
         redisService.expire(verifyKey, 30)
@@ -112,21 +134,21 @@ class AuthServiceImpl : AuthService {
         return true
     }
 
-    override fun getVerifyCode(phoneNumber: String, type: VerifyType): Int? {
-        val verifyKey = String.format(verifyFormat, type, phoneNumber)
+    override fun getVerifyCode(phoneNumber: String, typeCode: VerifyTypeCode): Int? {
+        val verifyKey = String.format(verifyFormat, typeCode, phoneNumber)
         return redisService[verifyKey] as? Int
     }
 
-    override fun verifyCode(phoneNumber: String,
-                            code: Int?,
-                            deviceId: String?,
-                            deviceName: String?,
-                            platform: Platform,
-                            type: VerifyType,
-                            role: Role): AccountResponse? {
+    override fun registrationVerification(phoneNumber: String,
+                                          code: Int?,
+                                          deviceId: String?,
+                                          deviceName: String?,
+                                          platform: Platform,
+                                          typeCode: VerifyTypeCode,
+                                          role: Role): AccountResponse? {
 
-        val verifyKey = String.format(verifyFormat, type, phoneNumber)
-        val incorrectCountKey = String.format(verifyIncorrectCountFormat, type, phoneNumber)
+        val verifyKey = String.format(verifyFormat, typeCode, phoneNumber)
+        val incorrectCountKey = String.format(verifyIncorrectCountFormat, typeCode, phoneNumber)
 
         val verifyCode = redisService[verifyKey]
         var incorrectCount = (redisService[incorrectCountKey] as? Int ?: 0)
@@ -150,7 +172,45 @@ class AuthServiceImpl : AuthService {
         else
             saveAccount(phoneNumber = phoneNumber, deviceId = deviceId, deviceName = deviceName, platform = platform, role = role)
 
-        return verifyPhoneNumber(account?.id)
+        val accountVerify = verifyPhoneNumber(account?.id) ?: return null
+
+        return login(accountVerify)
+    }
+
+    override fun loginVerification(phoneNumber: String,
+                                   code: Int?,
+                                   deviceId: String?,
+                                   deviceName: String?,
+                                   platform: Platform,
+                                   typeCode: VerifyTypeCode,
+                                   role: Role): AccountResponse? {
+
+        val verifyKey = String.format(verifyFormat, typeCode, phoneNumber)
+        val incorrectCountKey = String.format(verifyIncorrectCountFormat, typeCode, phoneNumber)
+
+        val verifyCode = redisService[verifyKey]
+        var incorrectCount = (redisService[incorrectCountKey] as? Int ?: 0)
+
+        if ((redisService.getExpire(verifyKey) ?: -2) <= 0L)
+            throw VerifyCodeExpireException()
+
+        if (verifyCode != code || code == null || code < 100000 || code > 999999) {
+            incorrectCount--
+            redisService[incorrectCountKey] = incorrectCount
+            if (incorrectCount <= 0)
+                throw WrongTooManyTimesException()
+
+            throw VerifyCodeIncorrectException(redisService[incorrectCountKey] as? Int ?: 3)
+        }
+
+        val account = findByPhoneNumber(phoneNumber) ?: return null
+
+        val device = saveDeviceInfo(DeviceEntity(deviceId = deviceId, deviceName = deviceName, platform = platform))
+
+        if (account.devices?.any { element -> element?.deviceId == deviceId } == false)
+            account.devices?.add(device)
+
+        return login(account)
     }
 
     override fun saveAccount(staffId: String?,
@@ -164,14 +224,9 @@ class AuthServiceImpl : AuthService {
                              platform: Platform): AccountResponse? {
 
         // create and save device
-        val devices = arrayListOf<DeviceEntity?>()
-
-        val device = saveDevice(DeviceEntity(
-                deviceId = deviceId,
+        val devices = saveDeviceInfo(deviceId = deviceId,
                 deviceName = deviceName,
-                platform = platform))
-
-        devices.add(device)
+                platform = platform)
 
         // create and save user
         val user = userRepository.insert(UserEntity())
@@ -192,25 +247,17 @@ class AuthServiceImpl : AuthService {
         return AccountResponse.from(result)
     }
 
-    override fun saveDevice(device: DeviceEntity): DeviceEntity? = deviceRepository.save(device)
+    override fun saveDeviceInfo(device: DeviceEntity): DeviceEntity? = deviceRepository.save(device)
 
     override fun login(account: AccountEntity): AccountResponse? {
-
         account.active = true
         val result = accountRepository.save(account)
-
-        // insert login history
-        loginHistoryRepository.insert(LoginHistoryEntity(
-                accountId = result.id,
-                deviceId = account.devices?.last(),
-                loginTime = Date.from(Instant.now())
-        ))
-
+        insertHistory(accountId = result.id, account.devices?.last())
         // return dto
         return AccountResponse.from(result)
     }
 
-    override fun logout(accountId: String){
+    override fun logout(accountId: String) {
         val result = accountRepository.findById(accountId).get()
         result.active = false
         accountRepository.save(result)
@@ -219,7 +266,7 @@ class AuthServiceImpl : AuthService {
     override fun validatePassword(rawPassword: String?, encodedPassword: String?): Boolean = passwordEncoder.matches(rawPassword, encodedPassword)
     override fun encryptPassword(password: String?): String? = passwordEncoder.encode(password)
 
-    private fun verifyPhoneNumber(accountId: String?): AccountResponse? {
+    private fun verifyPhoneNumber(accountId: String?): AccountEntity? {
         if (accountId == null)
             return null
 
@@ -227,8 +274,7 @@ class AuthServiceImpl : AuthService {
         account.phoneVerified = true
         account.phoneVerifiedTime = Date.from(Instant.now())
 
-        val result = accountRepository.save(account)
-        return AccountResponse.from(result)
+        return accountRepository.save(account)
     }
 
     private fun verifyEmail(accountId: String?): AccountResponse? {
@@ -241,5 +287,28 @@ class AuthServiceImpl : AuthService {
 
         val result = accountRepository.save(account)
         return AccountResponse.from(result)
+    }
+
+    private fun saveDeviceInfo(deviceId: String?, deviceName: String?, platform: Platform): ArrayList<DeviceEntity?> {
+        // create and save device
+        val devices = arrayListOf<DeviceEntity?>()
+
+        val device = saveDeviceInfo(DeviceEntity(
+                deviceId = deviceId,
+                deviceName = deviceName,
+                platform = platform))
+
+        devices.add(device)
+        return devices
+    }
+
+    private fun insertHistory(accountId: String?, deviceInfo: DeviceEntity?) {
+        // insert login history
+        loginHistoryRepository.insert(LoginHistoryEntity(
+                accountId = accountId,
+                deviceInfo = deviceInfo,
+                loginTime = Date.from(Instant.now())
+        ))
+
     }
 }

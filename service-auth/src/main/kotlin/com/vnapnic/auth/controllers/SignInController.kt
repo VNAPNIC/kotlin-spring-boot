@@ -2,10 +2,9 @@ package com.vnapnic.auth.controllers
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.vnapnic.auth.dto.SignInRequest
-import com.vnapnic.auth.dto.VerifyType
+import com.vnapnic.auth.dto.VerifyTypeCode
 import com.vnapnic.common.dto.AccountResponse
 import com.vnapnic.auth.services.AuthService
-import com.vnapnic.database.enums.Platform
 import com.vnapnic.common.entities.Response
 import com.vnapnic.common.entities.ResultCode
 import com.vnapnic.common.service.JWTService
@@ -66,7 +65,7 @@ class SignInController {
                 return Response.failed(error = ResultCode.EMAIL_PASSWORD_INCORRECT)
 
             // Save device
-            val device = authService.saveDevice(DeviceEntity(
+            val device = authService.saveDeviceInfo(DeviceEntity(
                     deviceId = request.deviceId,
                     deviceName = request.deviceName,
                     platform = request.platform
@@ -118,7 +117,7 @@ class SignInController {
                     ?: return Response.failed(error = ResultCode.PHONE_NUMBER_NOT_EXISTS)
 
             // Save device
-            val device = authService.saveDevice(DeviceEntity(
+            val device = authService.saveDeviceInfo(DeviceEntity(
                     deviceId = request.deviceId,
                     deviceName = request.deviceName,
                     platform = request.platform
@@ -130,7 +129,7 @@ class SignInController {
 
             val account = authService.login(rawAccount)
             return if (account != null) {
-                authService.sendVerifyCode(phoneInterNational, VerifyType.PHONE_NUMBER)
+                authService.sendVerifyCode(phoneInterNational, VerifyTypeCode.PHONE_NUMBER)
                 val jwt = jwtService.generateJWT(rawAccount.id, request.deviceId)
                 return Response.success(data = account, token = jwt)
             } else {

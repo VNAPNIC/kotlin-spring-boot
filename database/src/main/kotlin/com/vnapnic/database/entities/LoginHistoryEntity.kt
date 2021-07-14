@@ -8,7 +8,7 @@ import java.util.*
 data class LoginHistoryEntity(
         @JsonProperty("accountId")
         val accountId: String? = null,
-        @JsonProperty("deviceId")
-        val deviceId: DeviceEntity? = null,
+        @JsonProperty("deviceInfo")
+        val deviceInfo: DeviceEntity? = null,
         @JsonProperty("loginTime")
         val loginTime: Date? = null)

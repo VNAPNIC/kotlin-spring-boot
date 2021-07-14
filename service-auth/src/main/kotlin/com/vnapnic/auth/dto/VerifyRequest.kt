@@ -5,15 +5,28 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.vnapnic.database.enums.Platform
 import com.vnapnic.database.enums.Role
 
+/**
+ * Determine what type of code to verify
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-enum class VerifyType {
+enum class VerifyTypeCode {
     PHONE_NUMBER,
     EMAIL,
     PASSWORD
 }
 
-data class GetVerifyCodeRequest(
+/**
+ * To determine if you want to get the code to register or log in
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+enum class SendVerifyType {
+    LOGIN,
+    REGISTER,
+}
+
+data class RequestSendToVerifyCode(
         val email: String?,
         val phoneNumber: String?,
         val dialCode: String?,
@@ -22,7 +35,7 @@ data class GetVerifyCodeRequest(
         val alpha3Code: String?,
         val enShortName: String?,
         val nationality: String?,
-        val type: VerifyType
+        val typeCode: VerifyTypeCode,
 )
 
 data class VerifyCodeRequest(
@@ -37,7 +50,7 @@ data class VerifyCodeRequest(
         val deviceName: String?,
         val deviceId: String?,
         val platform: Platform,
-        val type: VerifyType,
+        val typeCode: VerifyTypeCode,
         val verifyCode: Int?,
         val role: Role,
 )

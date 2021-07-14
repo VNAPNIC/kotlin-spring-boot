@@ -15,7 +15,7 @@ https://documenter.getpostman.com/view/7083569/Tzef9hxZ
    "message": "",
    "error": "",
    "token": "",
-   "data": Any
+   "data": null
  }
 ```
 
